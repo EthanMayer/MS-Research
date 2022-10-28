@@ -28,14 +28,19 @@ void* thread1() {
         error("Could not set sock opt for sub socket\n");
     }
 
-    char message[12];
+    int* arr[3];
 
     for (int i = 0; i < 100; i++)
     {
-        if (zmq_recv(subscriber, message, 12, 0) == -1) {
+        if (zmq_recv(subscriber, arr, sizeof(arr), 0) == -1) {
             error("Could not receive on pub socket\n");
         }
-        printf("%d: %s\n", i, message);
+        printf("Received array of size %d: [", sizeof(arr)/sizeof(arr[0]));
+        for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+            printf("%d ", arr[i]);
+        }
+        printf("]\n");
+        fflush(stdout);
     }
 
     zmq_close(subscriber);
@@ -135,10 +140,17 @@ int start_test() {
     // }
 
 
+    int* arr[] = {1, 2, 3};
+    printf("Sent array of size %d: [", sizeof(arr)/sizeof(arr[0]));
+    for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("]\n");
+    fflush(stdout);
 
     while(1)
     {
-        if (zmq_send(publisher, "Hello World!", 12, 0) != 12) {
+        if (zmq_send(publisher, arr, sizeof(arr), 0) != sizeof(arr)) {
             error("Pub send buffer length incorrect\n");
         }
     }
