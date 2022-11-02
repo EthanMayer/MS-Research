@@ -5,6 +5,7 @@
 #include <errno.h>
 #include "cthreads.h"
 #include <zmq.h>
+#include <unistd.h>
 //#include <czmq.h>
 
 // error handling
@@ -32,14 +33,15 @@ void* thread1() {
 
     for (int i = 0; i < 100; i++)
     {
+        sleep(5);
         if (zmq_recv(subscriber, arr, sizeof(arr), 0) == -1) {
             error("Could not receive on pub socket\n");
         }
-        printf("Received array of size %d: [", sizeof(arr)/sizeof(arr[0]));
+        printf("Thread %ld: Received array of size %d: ", thread, sizeof(arr)/sizeof(arr[0]));
         for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
             printf("%d ", arr[i]);
         }
-        printf("]\n");
+        printf("\n");
         fflush(stdout);
     }
 
@@ -88,8 +90,9 @@ void* thread1() {
 // }
 
 // the function to be called from Cython
-int start_test() {
+int start_test(int arrp[3]) {
     printf("Entered C code\n");
+    printf("C code array: %d, %d, %d\n", arrp[0], arrp[1], arrp[2]);
     fflush(stdout);
     pthread_t t1;
     pthread_t t2;
@@ -140,19 +143,24 @@ int start_test() {
     // }
 
 
-    int* arr[] = {1, 2, 3};
-    printf("Sent array of size %d: [", sizeof(arr)/sizeof(arr[0]));
-    for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
-        printf("%d ", arr[i]);
-    }
-    printf("]\n");
-    fflush(stdout);
+    int* arr[] = {arrp[0], arrp[1], arrp[2]};
+    printf("C code pointer array: %d, %d, %d\n", arr[0], arr[1], arr[2]);
+    // printf("Sent array of size %d: ", sizeof(arr)/sizeof(arr[0]));
+    // for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+    //     printf("%d ", arr[i]);
+    // }
+    // printf("\n");
+    // fflush(stdout);
 
     while(1)
     {
+        sleep(5);
+        printf("Thread Main: Sent array of size %d: %d, %d, %d\n", sizeof(arr)/sizeof(arr[0]), arr[0], arr[1], arr[2]);
+        fflush(stdout);
         if (zmq_send(publisher, arr, sizeof(arr), 0) != sizeof(arr)) {
             error("Pub send buffer length incorrect\n");
         }
+
     }
 
     zmq_close(publisher);
