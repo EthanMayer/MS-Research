@@ -6,6 +6,6 @@ void error(char* msg);
 // the function to be parallelized
 void* thread1();
 // the function to be wrapped
-int start_test(int arr[3]);
+int start_test(int arr[], int arrSize);
 
 #endif

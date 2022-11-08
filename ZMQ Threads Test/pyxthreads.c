@@ -1297,7 +1297,7 @@ static PyObject *__pyx_pf_11zmq_threads_start_thread_test(CYTHON_UNUSED PyObject
 /* Late includes */
 
 /* "pyxthreads.pyx":7
- *     int start_test(int arr[3])
+ *     int start_test(int arr[], int arrSize)
  * 
  * cpdef int start_thread_test(tup):             # <<<<<<<<<<<<<<
  *     print("Cython tuple: " + str(tup))
@@ -1429,7 +1429,7 @@ static int __pyx_f_11zmq_threads_start_thread_test(PyObject *__pyx_v_tup, CYTHON
  *         print(str(i) + ": " + str(arr[i]) + ", " + str(tup[i]))
  *     print("Cython array: " + str(arr))             # <<<<<<<<<<<<<<
  *     print("Starting C code")
- *     cdef int val = start_test(arr)
+ *     cdef int val = start_test(arr, n)
  */
   __pyx_t_1 = __Pyx_carray_to_py_int(__pyx_v_arr, 3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -1446,7 +1446,7 @@ static int __pyx_f_11zmq_threads_start_thread_test(PyObject *__pyx_v_tup, CYTHON
  *         print(str(i) + ": " + str(arr[i]) + ", " + str(tup[i]))
  *     print("Cython array: " + str(arr))
  *     print("Starting C code")             # <<<<<<<<<<<<<<
- *     cdef int val = start_test(arr)
+ *     cdef int val = start_test(arr, n)
  *     print("Returned with value ")
  */
   if (__Pyx_PrintOne(0, __pyx_kp_s_Starting_C_code) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
@@ -1454,22 +1454,22 @@ static int __pyx_f_11zmq_threads_start_thread_test(PyObject *__pyx_v_tup, CYTHON
   /* "pyxthreads.pyx":17
  *     print("Cython array: " + str(arr))
  *     print("Starting C code")
- *     cdef int val = start_test(arr)             # <<<<<<<<<<<<<<
+ *     cdef int val = start_test(arr, n)             # <<<<<<<<<<<<<<
  *     print("Returned with value ")
  *     return 0
  */
-  __pyx_v_val = start_test(__pyx_v_arr);
+  __pyx_v_val = start_test(__pyx_v_arr, __pyx_v_n);
 
   /* "pyxthreads.pyx":18
  *     print("Starting C code")
- *     cdef int val = start_test(arr)
+ *     cdef int val = start_test(arr, n)
  *     print("Returned with value ")             # <<<<<<<<<<<<<<
  *     return 0
  */
   if (__Pyx_PrintOne(0, __pyx_kp_s_Returned_with_value) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
 
   /* "pyxthreads.pyx":19
- *     cdef int val = start_test(arr)
+ *     cdef int val = start_test(arr, n)
  *     print("Returned with value ")
  *     return 0             # <<<<<<<<<<<<<<
  */
@@ -1477,7 +1477,7 @@ static int __pyx_f_11zmq_threads_start_thread_test(PyObject *__pyx_v_tup, CYTHON
   goto __pyx_L0;
 
   /* "pyxthreads.pyx":7
- *     int start_test(int arr[3])
+ *     int start_test(int arr[], int arrSize)
  * 
  * cpdef int start_thread_test(tup):             # <<<<<<<<<<<<<<
  *     print("Cython tuple: " + str(tup))
