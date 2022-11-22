@@ -67,19 +67,13 @@ int start_test(int arr[], int arrSize) {
         fflush(stdout);
     }
     printf("%d\n", arr[arrSize - 1]);
-        printf("Total elements in array: %d. Total size of array: %d.\n", arrSize, arrSize*8);
+    printf("Total elements in array: %d. Total size of array: %d.\n", arrSize, arrSize*8);
     fflush(stdout);
 
-    // Create main sender pair socket
+    // Create main thread pair socket
     void *context = zmq_ctx_new();
-    void *pair_m_s = zmq_socket(context, ZMQ_PAIR);
-    if (zmq_bind(pair_m_s, "inproc://m_s") != 0) {
-        error("Could not bind main sender socket\n");
-    }
-
-    // Create main receiver pair socket
-    void *pair_m_r = zmq_socket(context, ZMQ_PAIR);
-    if (zmq_bind(pair_m_r, "inproc://m_r") != 0) {
+    void *sckt = zmq_socket(context, ZMQ_PAIR);
+    if (zmq_bind(sckt, "tcp://127.0.0.1:5556") != 0) {
         error("Could not bind main receiver socket\n");
     }
 
@@ -98,34 +92,44 @@ int start_test(int arr[], int arrSize) {
         error("Can't create thread\n");
     }
 
-    char* buf = "";
-    if (zmq_recv(pair_m_r, buf, sizeof(buf), 0) == -1) {
+    char buf[] = "     ";
+    if (zmq_recv(sckt, buf, sizeof(buf), 0) == -1) {
         error("Could not receive on main receive socket\n");
     }
-    printf("Received: %s", buf);
+    printf("Main: received %s\n", buf);
     fflush(stdout);
 
-    if (zmq_connect(pair_m_s, "inproc://t1_r") != 0) {
+    if (zmq_connect(sckt, "inproc://t1_r") != 0) {
         error("Could not connect to thread1 receiver socket\n");
     }
 
     // Send array via socket to thread
     // while(1) {
         // sleep(5);
-        printf("Thread Main: Sent array\n");
+        printf("Main: Sent array\n");
         fflush(stdout);
-        if (zmq_send(pair_m_s, arr, arrSize*8, 0) != arrSize*8) {
+        if (zmq_send(sckt, arr, arrSize*8, 0) != arrSize*8) {
             error("Pair send buffer length incorrect\n");
         }
     // }
 
+    int arr2[arrSize];
+    if (zmq_recv(sckt, arr2, sizeof(arr2), 0) == -1) {
+        error("Could not receive on main receive socket\n");
+    }
+    printf("Main: Received array of size %d: ", sizeof(arr2)/sizeof(arr2[0]));
+    for (int i = 0; i < sizeof(arr2)/sizeof(arr2[0]); i++) {
+        printf("%d ", arr2[i]);
+    }
+    printf("\n");
+    fflush(stdout);
+
     // Clean up socket
-    zmq_close(pair_m_s);
-    zmq_close(pair_m_r);
+    zmq_close(sckt);
     zmq_ctx_destroy(context);
     
     // Join thread
-    printf("Main joining thread\n");
+    printf("Main: joining thread\n");
     fflush(stdout);
     if (pthread_join(t1, NULL) == -1) {
         error("Can't join thread 1\n");
