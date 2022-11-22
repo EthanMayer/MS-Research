@@ -3,6 +3,11 @@ import sys
 from comp import *
 
 print("======== Starting Actor.py ========")
-arr = (int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
+n = len(sys.argv)
+arr = []
+for i in range(1,n):
+    arr.append(int(sys.argv[i]))
+arr = tuple(arr)
+# arr = (int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]))
 print("Tuple: " + str(arr))
 main(arr)

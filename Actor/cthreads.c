@@ -9,7 +9,7 @@
 #include <dlfcn.h>
 //#include <czmq.h>
 
-// error handling
+// Error handling
 void error(char* msg) {
     printf("%s: %s\n", msg, strerror(errno));
     fflush(stdout);
@@ -54,24 +54,30 @@ void error(char* msg) {
 //     return NULL;
 // }
 
-// void* thread2() {
-
-// }
-
-// the function to be called from Cython
+// Function to be called from Cython
 int start_test(int arr[], int arrSize) {
-    printf("Entered C code\n");
-    printf("C code array: %d, %d, %d\n", arr[0], arr[1], arr[2]);
-    fflush(stdout);
     pthread_t t1;
-    //pthread_t t2;
 
+    // Debug print to ensure array is correct
+    printf("======== Entered C code ========\n");
+    printf("C code array: ");
+    fflush(stdout);
+    for(int i = 0; i < arrSize - 2; i++) {
+        printf("%d, ", arr[i]);
+        fflush(stdout);
+    }
+    printf("%d\n", arr[arrSize - 1]);
+        printf("Total elements in array: %d. Total size of array: %d.\n", arrSize, arrSize*8);
+    fflush(stdout);
+
+    // Create publisher socket to communicate to thread
     void *context = zmq_ctx_new();
     void *publisher = zmq_socket(context, ZMQ_PUB);
     if (zmq_bind(publisher, "tcp://127.0.0.1:5556") != 0) {
         error("Could not bind pub socket\n");
     }
 
+    // Open .so shared library and grab function from it
     char* libpath = "funcBody.so";
     void* libhandle = dlopen(libpath, RTLD_LAZY);
 
@@ -79,41 +85,33 @@ int start_test(int arr[], int arrSize) {
         error("Could not open shared library");
     }
 
+    // Create thread with the .so function as body
     void (*thread1) = dlsym(libhandle, "thread1");
 
     if (pthread_create(&t1, NULL, thread1, NULL) == -1) {
         error("Can't create thread\n");
     }
-    // if (pthread_create(&t2, NULL, &thread2, NULL) == -1) {
-    // error("Can't create thread\n");
-    // }
 
-    printf("Total elements in array: %d. Total size of array: %d.\n", arrSize, arrSize*8);
-    fflush(stdout);
-
-    while(1)
-    {
+    // Send array via socket to thread
+    while(1) {
         sleep(5);
-        printf("Thread Main: Sent array of size %d: %d, %d, %d\n", arrSize, arr[0], arr[1], arr[2]);
+        printf("Thread Main: Sent array\n");
         fflush(stdout);
         if (zmq_send(publisher, arr, arrSize*8, 0) != arrSize*8) {
             error("Pub send buffer length incorrect\n");
         }
-
     }
 
+    // Clean up socket
     zmq_close(publisher);
     zmq_ctx_destroy(context);
     
+    // Join thread
     printf("Main joining thread\n");
     fflush(stdout);
     if (pthread_join(t1, NULL) == -1) {
         error("Can't join thread 1\n");
     }
-
-    // if (pthread_join(&t2, NULL) == -1) {
-    //     error("Can't join thread 2\n");
-    // }
 
     return 1;
 }

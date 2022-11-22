@@ -5,18 +5,21 @@
 #include <unistd.h>
 #include <zmq.h>
 
-// error handling
+// Error handling
 void error(char* msg) {
     printf("%s: %s\n", msg, strerror(errno));
     fflush(stdout);
     exit(1);
 }
 
+// Function to be run on a thread
 void* thread1() {
+    // Debug identify self
     long thread = pthread_self();
     printf("Thread %ld started\n", thread);
     fflush(stdout);
 
+    // Create subscriber socket and connect to main thread publisher socket
     void *context = zmq_ctx_new();
     void *subscriber = zmq_socket(context, ZMQ_SUB);
     if (zmq_connect(subscriber, "tcp://127.0.0.1:5556") != 0) {
@@ -28,6 +31,7 @@ void* thread1() {
 
     int arr[3];
 
+    // Receive information from main thread via socket
     for (int i = 0; i < 100; i++)
     {
         sleep(5);
@@ -42,6 +46,7 @@ void* thread1() {
         fflush(stdout);
     }
 
+    // Clean up socket
     zmq_close(subscriber);
     zmq_ctx_destroy(context);
 
