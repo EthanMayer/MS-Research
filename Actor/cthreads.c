@@ -16,58 +16,20 @@ void error(char* msg) {
     exit(1);
 }
 
-// void* thread1() {
-//     long thread = pthread_self();
-//     printf("Thread %ld started\n", thread);
-//     fflush(stdout);
-
-//     void *context = zmq_ctx_new();
-//     void *subscriber = zmq_socket(context, ZMQ_SUB);
-//     if (zmq_connect(subscriber, "tcp://127.0.0.1:5556") != 0) {
-//         error("Could not connect to pub socket\n");
-//     }
-//     if (zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "", 0) != 0) {
-//         error("Could not set sock opt for sub socket\n");
-//     }
-
-//     int arr[3];
-
-//     for (int i = 0; i < 100; i++)
-//     {
-//         sleep(5);
-//         if (zmq_recv(subscriber, arr, sizeof(arr), 0) == -1) {
-//             error("Could not receive on pub socket\n");
-//         }
-//         printf("Thread %ld: Received array of size %d: ", thread, sizeof(arr)/sizeof(arr[0]));
-//         for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
-//             printf("%d ", arr[i]);
-//         }
-//         printf("\n");
-//         fflush(stdout);
-//     }
-
-//     zmq_close(subscriber);
-//     zmq_ctx_destroy(context);
-
-//     printf("Thread %ld exiting\n", thread);
-//     fflush(stdout);
-//     return NULL;
-// }
-
 // Function to be called from Cython
-int start_test(int arr[], int arrSize) {
+int* start_test(int arr[], int arrSize) {
     pthread_t t1;
 
     // Debug print to ensure array is correct
     printf("======== Entered C code ========\n");
-    printf("C code array: ");
+    printf("Main: C array: ");
     fflush(stdout);
-    for(int i = 0; i < arrSize - 2; i++) {
+    for(int i = 0; i < arrSize - 1; i++) {
         printf("%d, ", arr[i]);
         fflush(stdout);
     }
     printf("%d\n", arr[arrSize - 1]);
-    printf("Total elements in array: %d. Total size of array: %d.\n", arrSize, arrSize*8);
+    printf("Main: Total elements in array: %d. Total size of array: %d.\n", arrSize, arrSize*8);
     fflush(stdout);
 
     // Create main thread pair socket
@@ -92,33 +54,37 @@ int start_test(int arr[], int arrSize) {
         error("Can't create thread\n");
     }
 
-    char buf[] = "     ";
+    // Receive "Ready" message to know the thread is ready
+    char buf[6];
     if (zmq_recv(sckt, buf, sizeof(buf), 0) == -1) {
         error("Could not receive on main receive socket\n");
     }
-    printf("Main: received %s\n", buf);
+    printf("Main: Received '%s'\n", buf);
     fflush(stdout);
 
-    if (zmq_connect(sckt, "inproc://t1_r") != 0) {
-        error("Could not connect to thread1 receiver socket\n");
+    // Send array size via socket to thread
+    char sizeBuf[256];
+    sprintf(sizeBuf, "%d", arrSize);
+    printf("Main: Sent array size\n");
+    fflush(stdout);
+    if (zmq_send(sckt, sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)) {
+        error("Pair send buffer length incorrect\n");
     }
 
     // Send array via socket to thread
-    // while(1) {
-        // sleep(5);
-        printf("Main: Sent array\n");
-        fflush(stdout);
-        if (zmq_send(sckt, arr, arrSize*8, 0) != arrSize*8) {
-            error("Pair send buffer length incorrect\n");
-        }
-    // }
+    printf("Main: Sent array\n");
+    fflush(stdout);
+    if (zmq_send(sckt, arr, arrSize * sizeof(int), 0) != arrSize * sizeof(int)) {
+        error("Pair send buffer length incorrect\n");
+    }
 
-    int arr2[arrSize];
-    if (zmq_recv(sckt, arr2, sizeof(arr2), 0) == -1) {
+    // Receive array back via socket from thread
+    int* arr2 = malloc(arrSize * sizeof(int));
+    if (zmq_recv(sckt, arr2, arrSize * sizeof(int), 0) == -1) {
         error("Could not receive on main receive socket\n");
     }
-    printf("Main: Received array of size %d: ", sizeof(arr2)/sizeof(arr2[0]));
-    for (int i = 0; i < sizeof(arr2)/sizeof(arr2[0]); i++) {
+    printf("Main: Received array of size %d: ", arrSize);
+    for (int i = 0; i < arrSize; i++) {
         printf("%d ", arr2[i]);
     }
     printf("\n");
@@ -129,11 +95,12 @@ int start_test(int arr[], int arrSize) {
     zmq_ctx_destroy(context);
     
     // Join thread
-    printf("Main: joining thread\n");
+    printf("Main: Joining thread\n");
     fflush(stdout);
     if (pthread_join(t1, NULL) == -1) {
         error("Can't join thread 1\n");
     }
 
-    return 1;
+    // Return array to Cython
+    return arr2;
 }

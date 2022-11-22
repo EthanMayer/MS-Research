@@ -16,7 +16,7 @@ void error(char* msg) {
 void* thread1() {
     // Debug identify self
     long thread = pthread_self();
-    printf("Thread %ld: started\n", thread);
+    printf("Thread %ld: Started\n", thread);
     fflush(stdout);
 
     // Create thread1 receiver pair socket and connect to main's sender pair
@@ -25,40 +25,41 @@ void* thread1() {
     if (zmq_connect(sckt, "tcp://127.0.0.1:5556") != 0) {
         error("Could not connect to main socket\n");
     }
-
-    // sleep(1);
     
+    // Send the Ready message to main thread
     char* buf = "Ready";
-
-    printf("Thread %ld: sending Ready signal\n", thread);
+    printf("Thread %ld: Sending 'Ready' signal\n", thread);
     fflush(stdout);
-    // for (int i = 0; i < 1000; i++) {
-        if (zmq_send(sckt, buf, sizeof(buf), 0) != sizeof(buf)) {
-            error("Pair send buffer length incorrect\n");
-        }
-    // }
+    if (zmq_send(sckt, buf, sizeof(buf), 0) != sizeof(buf)) {
+        error("Pair send buffer length incorrect\n");
+    }
 
-    int arr[3];
+    char sizeBuf[256];
+    // Get the size of the incoming array
+    if (zmq_recv(sckt, sizeBuf, sizeof(sizeBuf), 0) == -1) {
+        error("Could not receive on thread1 receive socket\n");
+    }
+    int arrSize = atoi(sizeBuf);
+    printf("Thread %ld: Received array size %d\n", thread, arrSize);
 
     // Receive information from main thread via socket
-    // for (int i = 0; i < 100; i++) {
-        // sleep(5);
-        printf("Thread %ld: ready to receive array\n", thread);
-        fflush(stdout);
-        if (zmq_recv(sckt, arr, sizeof(arr), 0) == -1) {
-            error("Could not receive on thread1 receive socket\n");
-        }
-        printf("Thread %ld: Received array of size %d: ", thread, sizeof(arr)/sizeof(arr[0]));
-        for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
-            printf("%d ", arr[i]);
-        }
-        printf("\n");
-        fflush(stdout);
-    // }
-
-    printf("Thread %ld: sending array back\n", thread);
+    int arr[arrSize];
+    printf("Thread %ld: Ready to receive array\n", thread);
     fflush(stdout);
-    if (zmq_send(sckt, arr, sizeof(arr), 0) != sizeof(arr)) {
+    if (zmq_recv(sckt, arr, arrSize * sizeof(int), 0) == -1) {
+        error("Could not receive on thread1 receive socket\n");
+    }
+    printf("Thread %ld: Received array: ", thread);
+    for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+    fflush(stdout);
+
+    // Send information back to main thread
+    printf("Thread %ld: Sending array back\n", thread);
+    fflush(stdout);
+    if (zmq_send(sckt, arr, arrSize * sizeof(int), 0) != arrSize * sizeof(int)) {
         error("Pair send buffer length incorrect\n");
     }
 
@@ -66,7 +67,8 @@ void* thread1() {
     zmq_close(sckt);
     zmq_ctx_destroy(context);
 
-    printf("Thread %ld: exiting\n", thread);
+    // Exit
+    printf("Thread %ld: Exiting\n", thread);
     fflush(stdout);
     return NULL;
 }

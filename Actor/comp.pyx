@@ -2,24 +2,38 @@ from libc.stdlib cimport malloc, free
 
 # import the interface function declaration from the header file
 cdef extern from "cthreads.h":
-    int start_test(int arr[], int arrSize)
+    int* start_test(int arr[], int arrSize)
     
-cpdef int main(tup):
-    print("======== Starting Comp.pyx ========")
-    # print("Cython tuple: " + str(tup))
+# main Cython function to call C
+cpdef tuple main(tup):
+    print("======== Comp.pyx ========")
+
+    # Convert tuple to C array
     cdef int n = len(tup)
-    #cdef int[3] arr
     cdef int* arr = <int*> malloc(n * sizeof(int))
     cdef int i = 0
     for i in range(n):
         arr[i] = tup[i]
-        # print(str(i) + ": " + str(arr[i]) + ", " + str(tup[i]))
-    # print("Cython C array: " + str(arr))
-    # print("Starting C code")
+
+    # Allocate array for return values
+    cdef int* arr2 = <int*> malloc(n * sizeof(int))
+
+    # Call C file
+    print("Sending tuple to C as C array")
     try:
-        val = start_test(arr, n)
-    except KeyboardInterrupt:
+        arr2 = start_test(arr, n)
+    #except KeyboardInterrupt:
+    finally:
         free(arr)
-        print("Array freed")
-    print("Returned with value ")
-    return 0
+    
+    # Convert C array to tuple
+    tup2 = []
+    for i in range(n):
+        tup2.append(int(arr2[i]))
+    tup2 = tuple(tup2)
+    free(arr2)
+
+    # Return tuple to Python
+    print("======== Comp.pyx ========")
+    print("Sending C array to Python as tuple")
+    return tup2
