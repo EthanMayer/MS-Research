@@ -7,7 +7,36 @@
 #include <zmq.h>
 #include <unistd.h>
 #include <dlfcn.h>
+#include "uthash.h"
 //#include <czmq.h>
+
+// Hash table for ZMQ ports
+struct port_dict {
+    char* name;             // The key is the name of the port
+    void* port;      // Storage is a pointer to ZMQ port
+    UT_hash_handle hh; /* makes this structure hashable */
+};
+
+// Initialize list of ports
+struct port_dict *ports = NULL;
+
+// Adds a port structure to the list
+void add_port(struct port_dict *s) {
+    HASH_ADD_INT(ports, name, s);
+}
+
+// Finds a port in the list by looking up key (name)
+struct port_dict *find_port(char* port_name) {
+    struct port_dict *s;
+
+    HASH_FIND_INT(ports, &port_name, s);
+    return s;
+}
+
+// Deletes a port from the list
+void delete_user(struct port_dict *port) {
+    HASH_DEL(ports, port);
+}
 
 // Error handling
 void error(char* msg) {
@@ -35,9 +64,17 @@ int* start_test(int arr[], int arrSize) {
     // Create main thread pair socket
     void *context = zmq_ctx_new();
     void *sckt = zmq_socket(context, ZMQ_PAIR);
+
     if (zmq_bind(sckt, "tcp://127.0.0.1:5556") != 0) {
         error("Could not bind main receiver socket\n");
     }
+
+    struct port_dict t_1 = {
+        .name = "thread1",
+        .port = sckt
+    };
+
+    add_port(&t_1);
 
     // Open .so shared library and grab function from it
     char* libpath = "funcBody.so";
