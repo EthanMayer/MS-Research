@@ -70,11 +70,17 @@ int start_test(int arr[], int arrSize) {
         printf("Total elements in array: %d. Total size of array: %d.\n", arrSize, arrSize*8);
     fflush(stdout);
 
-    // Create publisher socket to communicate to thread
+    // Create main sender pair socket
     void *context = zmq_ctx_new();
-    void *publisher = zmq_socket(context, ZMQ_PUB);
-    if (zmq_bind(publisher, "tcp://127.0.0.1:5556") != 0) {
-        error("Could not bind pub socket\n");
+    void *pair_m_s = zmq_socket(context, ZMQ_PAIR);
+    if (zmq_bind(pair_m_s, "inproc://m_s") != 0) {
+        error("Could not bind main sender socket\n");
+    }
+
+    // Create main receiver pair socket
+    void *pair_m_r = zmq_socket(context, ZMQ_PAIR);
+    if (zmq_bind(pair_m_r, "inproc://m_r") != 0) {
+        error("Could not bind main receiver socket\n");
     }
 
     // Open .so shared library and grab function from it
@@ -92,18 +98,30 @@ int start_test(int arr[], int arrSize) {
         error("Can't create thread\n");
     }
 
-    // Send array via socket to thread
-    while(1) {
-        sleep(5);
-        printf("Thread Main: Sent array\n");
-        fflush(stdout);
-        if (zmq_send(publisher, arr, arrSize*8, 0) != arrSize*8) {
-            error("Pub send buffer length incorrect\n");
-        }
+    char* buf = "";
+    if (zmq_recv(pair_m_r, buf, sizeof(buf), 0) == -1) {
+        error("Could not receive on main receive socket\n");
+    }
+    printf("Received: %s", buf);
+    fflush(stdout);
+
+    if (zmq_connect(pair_m_s, "inproc://t1_r") != 0) {
+        error("Could not connect to thread1 receiver socket\n");
     }
 
+    // Send array via socket to thread
+    // while(1) {
+        // sleep(5);
+        printf("Thread Main: Sent array\n");
+        fflush(stdout);
+        if (zmq_send(pair_m_s, arr, arrSize*8, 0) != arrSize*8) {
+            error("Pair send buffer length incorrect\n");
+        }
+    // }
+
     // Clean up socket
-    zmq_close(publisher);
+    zmq_close(pair_m_s);
+    zmq_close(pair_m_r);
     zmq_ctx_destroy(context);
     
     // Join thread
