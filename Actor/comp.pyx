@@ -1,10 +1,16 @@
+#   comp.pyx
+#    
+#   Author - Ethan Mayer
+#   Fall 2022  
+
+# Import functions from the c standard library
 from libc.stdlib cimport malloc, free
 
-# import the interface function declaration from the header file
+# Import the interface function declaration from the header file
 cdef extern from "cthreads.h":
     int* start_test(int arr[], int arrSize)
     
-# main Cython function to call C
+# Main Cython function to call C
 cpdef tuple main(tup):
     print("======== Comp.pyx ========")
 
@@ -22,7 +28,6 @@ cpdef tuple main(tup):
     print("Sending tuple to C as C array")
     try:
         arr2 = start_test(arr, n)
-    #except KeyboardInterrupt:
     finally:
         free(arr)
     

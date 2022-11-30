@@ -1,8 +1,12 @@
+//  funcBody.c
+//    
+//  Author - Ethan Mayer
+//  Fall 2022
+
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <pthread.h>
-#include <unistd.h>
 #include <zmq.h>
 
 // Error handling

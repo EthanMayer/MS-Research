@@ -1,14 +1,17 @@
+//  cthreads.c
+//    
+//  Author - Ethan Mayer
+//  Fall 2022
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
 #include <errno.h>
-#include "cthreads.h"
 #include <zmq.h>
-#include <unistd.h>
 #include <dlfcn.h>
 #include "uthash.h"
-//#include <czmq.h>
+#include "cthreads.h"
 
 // Hash table for ZMQ ports
 struct port_dict {
@@ -69,6 +72,7 @@ int* start_test(int arr[], int arrSize) {
         error("Could not bind main receiver socket\n");
     }
 
+    // Create entry for thread1's socket and add it to the hash table
     struct port_dict t_1 = {
         .name = "thread1",
         .port = sckt

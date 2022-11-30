@@ -1,11 +1,15 @@
+//  cthreads.h
+//    
+//  Author - Ethan Mayer
+//  Fall 2022  
+
 #ifndef CTHREADS_H
 #define CTHREADS_H
 
-// error handling
+// Error handling
 void error(char* msg);
-// the function to be parallelized
-void* thread1();
-// the function to be wrapped
+
+// Function to be called from Cython
 int* start_test(int arr[], int arrSize);
 
 #endif
