@@ -744,6 +744,10 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include <string.h>
 #include <stdlib.h>
 #include <dlfcn.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <pthread.h>
 #include "cthreads.h"
 #ifdef _OPENMP
 #include <omp.h>
@@ -1033,6 +1037,13 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStr(PyObject* obj, PyObject
 /* GetBuiltinName.proto */
 static PyObject *__Pyx_GetBuiltinName(PyObject *name);
 
+/* PyObjectCall.proto */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
+#else
+#define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
+#endif
+
 /* GetItemInt.proto */
 #define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
     (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
@@ -1054,88 +1065,6 @@ static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize
 static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j);
 static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
                                                      int is_list, int wraparound, int boundscheck);
-
-/* ListAppend.proto */
-#if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
-static CYTHON_INLINE int __Pyx_PyList_Append(PyObject* list, PyObject* x) {
-    PyListObject* L = (PyListObject*) list;
-    Py_ssize_t len = Py_SIZE(list);
-    if (likely(L->allocated > len) & likely(len > (L->allocated >> 1))) {
-        Py_INCREF(x);
-        PyList_SET_ITEM(list, len, x);
-        __Pyx_SET_SIZE(list, len + 1);
-        return 0;
-    }
-    return PyList_Append(list, x);
-}
-#else
-#define __Pyx_PyList_Append(L,x) PyList_Append(L,x)
-#endif
-
-/* PyCFunctionFastCall.proto */
-#if CYTHON_FAST_PYCCALL
-static CYTHON_INLINE PyObject *__Pyx_PyCFunction_FastCall(PyObject *func, PyObject **args, Py_ssize_t nargs);
-#else
-#define __Pyx_PyCFunction_FastCall(func, args, nargs)  (assert(0), NULL)
-#endif
-
-/* PyFunctionFastCall.proto */
-#if CYTHON_FAST_PYCALL
-#define __Pyx_PyFunction_FastCall(func, args, nargs)\
-    __Pyx_PyFunction_FastCallDict((func), (args), (nargs), NULL)
-#if 1 || PY_VERSION_HEX < 0x030600B1
-static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, Py_ssize_t nargs, PyObject *kwargs);
-#else
-#define __Pyx_PyFunction_FastCallDict(func, args, nargs, kwargs) _PyFunction_FastCallDict(func, args, nargs, kwargs)
-#endif
-#define __Pyx_BUILD_ASSERT_EXPR(cond)\
-    (sizeof(char [1 - 2*!(cond)]) - 1)
-#ifndef Py_MEMBER_SIZE
-#define Py_MEMBER_SIZE(type, member) sizeof(((type *)0)->member)
-#endif
-#if CYTHON_FAST_PYCALL
-  static size_t __pyx_pyframe_localsplus_offset = 0;
-  #include "frameobject.h"
-#if PY_VERSION_HEX >= 0x030b00a6
-  #ifndef Py_BUILD_CORE
-    #define Py_BUILD_CORE 1
-  #endif
-  #include "internal/pycore_frame.h"
-#endif
-  #define __Pxy_PyFrame_Initialize_Offsets()\
-    ((void)__Pyx_BUILD_ASSERT_EXPR(sizeof(PyFrameObject) == offsetof(PyFrameObject, f_localsplus) + Py_MEMBER_SIZE(PyFrameObject, f_localsplus)),\
-     (void)(__pyx_pyframe_localsplus_offset = ((size_t)PyFrame_Type.tp_basicsize) - Py_MEMBER_SIZE(PyFrameObject, f_localsplus)))
-  #define __Pyx_PyFrame_GetLocalsplus(frame)\
-    (assert(__pyx_pyframe_localsplus_offset), (PyObject **)(((char *)(frame)) + __pyx_pyframe_localsplus_offset))
-#endif // CYTHON_FAST_PYCALL
-#endif
-
-/* PyObjectCall.proto */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
-#else
-#define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
-#endif
-
-/* PyObjectCall2Args.proto */
-static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2);
-
-/* PyObjectCallMethO.proto */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
-#endif
-
-/* PyObjectCallOneArg.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
-
-/* PyObjectGetMethod.proto */
-static int __Pyx_PyObject_GetMethod(PyObject *obj, PyObject *name, PyObject **method);
-
-/* PyObjectCallMethod1.proto */
-static PyObject* __Pyx_PyObject_CallMethod1(PyObject* obj, PyObject* method_name, PyObject* arg);
-
-/* append.proto */
-static CYTHON_INLINE int __Pyx_PyObject_Append(PyObject* L, PyObject* x);
 
 /* PyDictVersioning.proto */
 #if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
@@ -1278,92 +1207,239 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'posix.dlfcn' */
 
+/* Module declarations from 'libc.errno' */
+
+/* Module declarations from 'posix.types' */
+
+/* Module declarations from 'posix.signal' */
+
+/* Module declarations from 'pthread' */
+
 /* Module declarations from 'comp' */
+static PyObject *__pyx_f_4comp_error(PyObject *, int __pyx_skip_dispatch); /*proto*/
 static PyObject *__pyx_f_4comp_main(PyObject *, int __pyx_skip_dispatch); /*proto*/
 #define __Pyx_MODULE_NAME "comp"
 extern int __pyx_module_is_main_comp;
 int __pyx_module_is_main_comp = 0;
 
 /* Implementation of 'comp' */
+static PyObject *__pyx_builtin_exit;
 static PyObject *__pyx_builtin_range;
+static const char __pyx_k_[] = ": ";
 static const char __pyx_k_end[] = "end";
+static const char __pyx_k_exit[] = "exit";
 static const char __pyx_k_file[] = "file";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_print[] = "print";
 static const char __pyx_k_range[] = "range";
-static const char __pyx_k_append[] = "append";
 static const char __pyx_k_Comp_pyx[] = "======== Comp.pyx ========";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
-static const char __pyx_k_Sending_tuple_to_C_as_C_array[] = "Sending tuple to C as C array";
+static const char __pyx_k_Can_t_create_thread[] = "Can't create thread";
+static const char __pyx_k_Can_t_join_thread_1[] = "Can't join thread 1";
+static const char __pyx_k_Main_Joining_thread[] = "Main: Joining thread\n";
+static const char __pyx_k_Could_not_open_shared_library[] = "Could not open shared library";
 static const char __pyx_k_Sending_C_array_to_Python_as_tup[] = "Sending C array to Python as tuple";
+static PyObject *__pyx_kp_s_;
+static PyObject *__pyx_kp_s_Can_t_create_thread;
+static PyObject *__pyx_kp_s_Can_t_join_thread_1;
 static PyObject *__pyx_kp_s_Comp_pyx;
+static PyObject *__pyx_kp_s_Could_not_open_shared_library;
+static PyObject *__pyx_kp_s_Main_Joining_thread;
 static PyObject *__pyx_kp_s_Sending_C_array_to_Python_as_tup;
-static PyObject *__pyx_kp_s_Sending_tuple_to_C_as_C_array;
-static PyObject *__pyx_n_s_append;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_end;
+static PyObject *__pyx_n_s_exit;
 static PyObject *__pyx_n_s_file;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_n_s_range;
 static PyObject *__pyx_n_s_test;
-static PyObject *__pyx_pf_4comp_main(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_tup); /* proto */
+static PyObject *__pyx_pf_4comp_error(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_msg); /* proto */
+static PyObject *__pyx_pf_4comp_2main(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_tup); /* proto */
+static PyObject *__pyx_int_1;
+static PyObject *__pyx_tuple__2;
 /* Late includes */
 
-/* "comp.pyx":15
+/* "comp.pyx":18
+ * 
+ * # Error handling
+ * cpdef error(msg):             # <<<<<<<<<<<<<<
+ *     print(msg + ": " + strerror(errno))
+ *     exit(1)
+ */
+
+static PyObject *__pyx_pw_4comp_1error(PyObject *__pyx_self, PyObject *__pyx_v_msg); /*proto*/
+static PyObject *__pyx_f_4comp_error(PyObject *__pyx_v_msg, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("error", 0);
+
+  /* "comp.pyx":19
+ * # Error handling
+ * cpdef error(msg):
+ *     print(msg + ": " + strerror(errno))             # <<<<<<<<<<<<<<
+ *     exit(1)
+ * 
+ */
+  __pyx_t_1 = PyNumber_Add(__pyx_v_msg, __pyx_kp_s_); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyBytes_FromString(strerror(errno)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyNumber_Add(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (__Pyx_PrintOne(0, __pyx_t_3) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+
+  /* "comp.pyx":20
+ * cpdef error(msg):
+ *     print(msg + ": " + strerror(errno))
+ *     exit(1)             # <<<<<<<<<<<<<<
+ * 
+ * # Main Cython function to call C
+ */
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_exit, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 20, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+
+  /* "comp.pyx":18
+ * 
+ * # Error handling
+ * cpdef error(msg):             # <<<<<<<<<<<<<<
+ *     print(msg + ": " + strerror(errno))
+ *     exit(1)
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_AddTraceback("comp.error", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static PyObject *__pyx_pw_4comp_1error(PyObject *__pyx_self, PyObject *__pyx_v_msg); /*proto*/
+static PyObject *__pyx_pw_4comp_1error(PyObject *__pyx_self, PyObject *__pyx_v_msg) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("error (wrapper)", 0);
+  __pyx_r = __pyx_pf_4comp_error(__pyx_self, ((PyObject *)__pyx_v_msg));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_4comp_error(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_msg) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("error", 0);
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __pyx_f_4comp_error(__pyx_v_msg, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("comp.error", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "comp.pyx":23
  * 
  * # Main Cython function to call C
  * cpdef tuple main(tup):             # <<<<<<<<<<<<<<
  *     print("======== Comp.pyx ========")
- * 
+ *     cdef int* arr2  # Array for return values
  */
 
-static PyObject *__pyx_pw_4comp_1main(PyObject *__pyx_self, PyObject *__pyx_v_tup); /*proto*/
+static PyObject *__pyx_pw_4comp_3main(PyObject *__pyx_self, PyObject *__pyx_v_tup); /*proto*/
 static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  pthread_t __pyx_v_t1;
+  CYTHON_UNUSED PyObject *__pyx_v_portDict = NULL;
   int __pyx_v_n;
   int *__pyx_v_arr;
   int __pyx_v_i;
-  int *__pyx_v_arr2;
+  char *__pyx_v_libpath;
+  void *__pyx_v_libhandle;
+  void *__pyx_v_thread1;
   PyObject *__pyx_v_tup2 = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  int __pyx_t_2;
+  PyObject *__pyx_t_1 = NULL;
+  Py_ssize_t __pyx_t_2;
   int __pyx_t_3;
   int __pyx_t_4;
-  PyObject *__pyx_t_5 = NULL;
+  int __pyx_t_5;
   int __pyx_t_6;
-  PyObject *__pyx_t_7 = NULL;
-  int __pyx_t_8;
+  int __pyx_t_7;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("main", 0);
 
-  /* "comp.pyx":16
+  /* "comp.pyx":24
  * # Main Cython function to call C
  * cpdef tuple main(tup):
  *     print("======== Comp.pyx ========")             # <<<<<<<<<<<<<<
- * 
- *     # Convert tuple to C array
+ *     cdef int* arr2  # Array for return values
+ *     cdef pthread_t t1    # Thread 1's ID
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Comp_pyx) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Comp_pyx) < 0) __PYX_ERR(0, 24, __pyx_L1_error)
 
-  /* "comp.pyx":19
+  /* "comp.pyx":27
+ *     cdef int* arr2  # Array for return values
+ *     cdef pthread_t t1    # Thread 1's ID
+ *     portDict = {}   # Dictionary for ports             # <<<<<<<<<<<<<<
  * 
- *     # Convert tuple to C array
+ *     # Convert python tuple to C array
+ */
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_v_portDict = ((PyObject*)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "comp.pyx":30
+ * 
+ *     # Convert python tuple to C array
  *     cdef int n = len(tup)             # <<<<<<<<<<<<<<
  *     cdef int* arr = <int*> malloc(n * sizeof(int))
  *     cdef int i = 0
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_tup); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 19, __pyx_L1_error)
-  __pyx_v_n = __pyx_t_1;
+  __pyx_t_2 = PyObject_Length(__pyx_v_tup); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_v_n = __pyx_t_2;
 
-  /* "comp.pyx":20
- *     # Convert tuple to C array
+  /* "comp.pyx":31
+ *     # Convert python tuple to C array
  *     cdef int n = len(tup)
  *     cdef int* arr = <int*> malloc(n * sizeof(int))             # <<<<<<<<<<<<<<
  *     cdef int i = 0
@@ -1371,7 +1447,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  */
   __pyx_v_arr = ((int *)malloc((__pyx_v_n * (sizeof(int)))));
 
-  /* "comp.pyx":21
+  /* "comp.pyx":32
  *     cdef int n = len(tup)
  *     cdef int* arr = <int*> malloc(n * sizeof(int))
  *     cdef int i = 0             # <<<<<<<<<<<<<<
@@ -1380,179 +1456,213 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  */
   __pyx_v_i = 0;
 
-  /* "comp.pyx":22
+  /* "comp.pyx":33
  *     cdef int* arr = <int*> malloc(n * sizeof(int))
  *     cdef int i = 0
  *     for i in range(n):             # <<<<<<<<<<<<<<
  *         arr[i] = tup[i]
  * 
  */
-  __pyx_t_2 = __pyx_v_n;
-  __pyx_t_3 = __pyx_t_2;
-  for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
-    __pyx_v_i = __pyx_t_4;
+  __pyx_t_3 = __pyx_v_n;
+  __pyx_t_4 = __pyx_t_3;
+  for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
+    __pyx_v_i = __pyx_t_5;
 
-    /* "comp.pyx":23
+    /* "comp.pyx":34
  *     cdef int i = 0
  *     for i in range(n):
  *         arr[i] = tup[i]             # <<<<<<<<<<<<<<
  * 
- *     # Allocate array for return values
+ *     # Create main thread pair socket
  */
-    __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_tup, __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 23, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_tup, __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     (__pyx_v_arr[__pyx_v_i]) = __pyx_t_6;
   }
 
-  /* "comp.pyx":29
+  /* "comp.pyx":41
+ * 
+ *     # Open .so shared library and grab function from it
+ *     cdef char* libpath = "funcBody.so";             # <<<<<<<<<<<<<<
+ *     cdef void *libhandle = dlopen(libpath, RTLD_LAZY);
+ * 
+ */
+  __pyx_v_libpath = ((char *)"funcBody.so");
+
+  /* "comp.pyx":42
+ *     # Open .so shared library and grab function from it
+ *     cdef char* libpath = "funcBody.so";
+ *     cdef void *libhandle = dlopen(libpath, RTLD_LAZY);             # <<<<<<<<<<<<<<
+ * 
+ *     if (libhandle == NULL):
+ */
+  __pyx_v_libhandle = dlopen(__pyx_v_libpath, RTLD_LAZY);
+
+  /* "comp.pyx":44
+ *     cdef void *libhandle = dlopen(libpath, RTLD_LAZY);
+ * 
+ *     if (libhandle == NULL):             # <<<<<<<<<<<<<<
+ *         error("Could not open shared library")
+ * 
+ */
+  __pyx_t_7 = ((__pyx_v_libhandle == NULL) != 0);
+  if (__pyx_t_7) {
+
+    /* "comp.pyx":45
+ * 
+ *     if (libhandle == NULL):
+ *         error("Could not open shared library")             # <<<<<<<<<<<<<<
+ * 
+ *     # Create thread with the .so function as body
+ */
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_open_shared_library, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+    /* "comp.pyx":44
+ *     cdef void *libhandle = dlopen(libpath, RTLD_LAZY);
+ * 
+ *     if (libhandle == NULL):             # <<<<<<<<<<<<<<
+ *         error("Could not open shared library")
+ * 
+ */
+  }
+
+  /* "comp.pyx":48
+ * 
+ *     # Create thread with the .so function as body
+ *     cdef void *thread1 = dlsym(libhandle, "thread1")             # <<<<<<<<<<<<<<
+ * 
+ *     if (pthread_create(&t1, NULL, thread1, NULL) == -1):
+ */
+  __pyx_v_thread1 = dlsym(__pyx_v_libhandle, ((char const *)"thread1"));
+
+  /* "comp.pyx":50
+ *     cdef void *thread1 = dlsym(libhandle, "thread1")
+ * 
+ *     if (pthread_create(&t1, NULL, thread1, NULL) == -1):             # <<<<<<<<<<<<<<
+ *         error("Can't create thread")
+ * 
+ */
+  __pyx_t_7 = ((pthread_create((&__pyx_v_t1), NULL, __pyx_v_thread1, NULL) == -1L) != 0);
+  if (__pyx_t_7) {
+
+    /* "comp.pyx":51
+ * 
+ *     if (pthread_create(&t1, NULL, thread1, NULL) == -1):
+ *         error("Can't create thread")             # <<<<<<<<<<<<<<
+ * 
+ *     # Receive "Ready" message to know the thread is ready
+ */
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Can_t_create_thread, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+    /* "comp.pyx":50
+ *     cdef void *thread1 = dlsym(libhandle, "thread1")
+ * 
+ *     if (pthread_create(&t1, NULL, thread1, NULL) == -1):             # <<<<<<<<<<<<<<
+ *         error("Can't create thread")
+ * 
+ */
+  }
+
+  /* "comp.pyx":64
+ * 
+ *     # Join thread
+ *     print("Main: Joining thread\n")             # <<<<<<<<<<<<<<
+ *     if (pthread_join(t1, NULL) == -1):
+ *         error("Can't join thread 1")
+ */
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Main_Joining_thread) < 0) __PYX_ERR(0, 64, __pyx_L1_error)
+
+  /* "comp.pyx":65
+ *     # Join thread
+ *     print("Main: Joining thread\n")
+ *     if (pthread_join(t1, NULL) == -1):             # <<<<<<<<<<<<<<
+ *         error("Can't join thread 1")
+ * 
+ */
+  __pyx_t_7 = ((pthread_join(__pyx_v_t1, NULL) == -1L) != 0);
+  if (__pyx_t_7) {
+
+    /* "comp.pyx":66
+ *     print("Main: Joining thread\n")
+ *     if (pthread_join(t1, NULL) == -1):
+ *         error("Can't join thread 1")             # <<<<<<<<<<<<<<
  * 
  *     # Call C file
- *     print("Sending tuple to C as C array")             # <<<<<<<<<<<<<<
- *     try:
- *         arr2 = start_test(arr, n)
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Sending_tuple_to_C_as_C_array) < 0) __PYX_ERR(0, 29, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Can_t_join_thread_1, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "comp.pyx":30
- *     # Call C file
- *     print("Sending tuple to C as C array")
- *     try:             # <<<<<<<<<<<<<<
- *         arr2 = start_test(arr, n)
- *     finally:
+    /* "comp.pyx":65
+ *     # Join thread
+ *     print("Main: Joining thread\n")
+ *     if (pthread_join(t1, NULL) == -1):             # <<<<<<<<<<<<<<
+ *         error("Can't join thread 1")
+ * 
  */
-  /*try:*/ {
-
-    /* "comp.pyx":31
- *     print("Sending tuple to C as C array")
- *     try:
- *         arr2 = start_test(arr, n)             # <<<<<<<<<<<<<<
- *     finally:
- *         free(arr)
- */
-    __pyx_v_arr2 = start_test(__pyx_v_arr, __pyx_v_n);
   }
 
-  /* "comp.pyx":33
- *         arr2 = start_test(arr, n)
- *     finally:
- *         free(arr)             # <<<<<<<<<<<<<<
- * 
- *     # Convert C array to tuple
- */
-  /*finally:*/ {
-    /*normal exit:*/{
-      free(__pyx_v_arr);
-      goto __pyx_L7;
-    }
-    __pyx_L7:;
-  }
-
-  /* "comp.pyx":36
- * 
- *     # Convert C array to tuple
- *     tup2 = []             # <<<<<<<<<<<<<<
- *     for i in range(n):
- *         tup2.append(int(arr2[i]))
- */
-  __pyx_t_5 = PyList_New(0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 36, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_v_tup2 = __pyx_t_5;
-  __pyx_t_5 = 0;
-
-  /* "comp.pyx":37
- *     # Convert C array to tuple
- *     tup2 = []
- *     for i in range(n):             # <<<<<<<<<<<<<<
- *         tup2.append(int(arr2[i]))
- *     tup2 = tuple(tup2)
- */
-  __pyx_t_2 = __pyx_v_n;
-  __pyx_t_3 = __pyx_t_2;
-  for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
-    __pyx_v_i = __pyx_t_4;
-
-    /* "comp.pyx":38
- *     tup2 = []
- *     for i in range(n):
- *         tup2.append(int(arr2[i]))             # <<<<<<<<<<<<<<
- *     tup2 = tuple(tup2)
- *     free(arr2)
- */
-    __pyx_t_5 = __Pyx_PyInt_From_int((__pyx_v_arr2[__pyx_v_i])); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 38, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_7 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 38, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_8 = __Pyx_PyObject_Append(__pyx_v_tup2, __pyx_t_7); if (unlikely(__pyx_t_8 == ((int)-1))) __PYX_ERR(0, 38, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  }
-
-  /* "comp.pyx":39
- *     for i in range(n):
- *         tup2.append(int(arr2[i]))
- *     tup2 = tuple(tup2)             # <<<<<<<<<<<<<<
- *     free(arr2)
- * 
- */
-  __pyx_t_7 = __Pyx_PySequence_Tuple(__pyx_v_tup2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 39, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_DECREF_SET(__pyx_v_tup2, __pyx_t_7);
-  __pyx_t_7 = 0;
-
-  /* "comp.pyx":40
- *         tup2.append(int(arr2[i]))
- *     tup2 = tuple(tup2)
- *     free(arr2)             # <<<<<<<<<<<<<<
- * 
- *     # Return tuple to Python
- */
-  free(__pyx_v_arr2);
-
-  /* "comp.pyx":43
+  /* "comp.pyx":83
  * 
  *     # Return tuple to Python
  *     print("======== Comp.pyx ========")             # <<<<<<<<<<<<<<
  *     print("Sending C array to Python as tuple")
- *     return tup2
+ *     tup2 = []
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Comp_pyx) < 0) __PYX_ERR(0, 43, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Comp_pyx) < 0) __PYX_ERR(0, 83, __pyx_L1_error)
 
-  /* "comp.pyx":44
+  /* "comp.pyx":84
  *     # Return tuple to Python
  *     print("======== Comp.pyx ========")
  *     print("Sending C array to Python as tuple")             # <<<<<<<<<<<<<<
+ *     tup2 = []
  *     return tup2
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Sending_C_array_to_Python_as_tup) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Sending_C_array_to_Python_as_tup) < 0) __PYX_ERR(0, 84, __pyx_L1_error)
 
-  /* "comp.pyx":45
+  /* "comp.pyx":85
  *     print("======== Comp.pyx ========")
  *     print("Sending C array to Python as tuple")
+ *     tup2 = []             # <<<<<<<<<<<<<<
+ *     return tup2
+ */
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 85, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_v_tup2 = ((PyObject*)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "comp.pyx":86
+ *     print("Sending C array to Python as tuple")
+ *     tup2 = []
  *     return tup2             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  if (!(likely(PyTuple_CheckExact(__pyx_v_tup2))||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "tuple", Py_TYPE(__pyx_v_tup2)->tp_name), 0))) __PYX_ERR(0, 45, __pyx_L1_error)
+  if (!(likely(PyTuple_CheckExact(__pyx_v_tup2))||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "tuple", Py_TYPE(__pyx_v_tup2)->tp_name), 0))) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_INCREF(__pyx_v_tup2);
   __pyx_r = ((PyObject*)__pyx_v_tup2);
   goto __pyx_L0;
 
-  /* "comp.pyx":15
+  /* "comp.pyx":23
  * 
  * # Main Cython function to call C
  * cpdef tuple main(tup):             # <<<<<<<<<<<<<<
  *     print("======== Comp.pyx ========")
- * 
+ *     cdef int* arr2  # Array for return values
  */
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_1);
   __Pyx_AddTraceback("comp.main", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_portDict);
   __Pyx_XDECREF(__pyx_v_tup2);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
@@ -1560,19 +1670,19 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4comp_1main(PyObject *__pyx_self, PyObject *__pyx_v_tup); /*proto*/
-static PyObject *__pyx_pw_4comp_1main(PyObject *__pyx_self, PyObject *__pyx_v_tup) {
+static PyObject *__pyx_pw_4comp_3main(PyObject *__pyx_self, PyObject *__pyx_v_tup); /*proto*/
+static PyObject *__pyx_pw_4comp_3main(PyObject *__pyx_self, PyObject *__pyx_v_tup) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("main (wrapper)", 0);
-  __pyx_r = __pyx_pf_4comp_main(__pyx_self, ((PyObject *)__pyx_v_tup));
+  __pyx_r = __pyx_pf_4comp_2main(__pyx_self, ((PyObject *)__pyx_v_tup));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4comp_main(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_tup) {
+static PyObject *__pyx_pf_4comp_2main(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_tup) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -1581,7 +1691,7 @@ static PyObject *__pyx_pf_4comp_main(CYTHON_UNUSED PyObject *__pyx_self, PyObjec
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("main", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_4comp_main(__pyx_v_tup, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_4comp_main(__pyx_v_tup, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 23, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1599,7 +1709,8 @@ static PyObject *__pyx_pf_4comp_main(CYTHON_UNUSED PyObject *__pyx_self, PyObjec
 }
 
 static PyMethodDef __pyx_methods[] = {
-  {"main", (PyCFunction)__pyx_pw_4comp_1main, METH_O, 0},
+  {"error", (PyCFunction)__pyx_pw_4comp_1error, METH_O, 0},
+  {"main", (PyCFunction)__pyx_pw_4comp_3main, METH_O, 0},
   {0, 0, 0, 0}
 };
 
@@ -1645,12 +1756,16 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
+  {&__pyx_kp_s_, __pyx_k_, sizeof(__pyx_k_), 0, 0, 1, 0},
+  {&__pyx_kp_s_Can_t_create_thread, __pyx_k_Can_t_create_thread, sizeof(__pyx_k_Can_t_create_thread), 0, 0, 1, 0},
+  {&__pyx_kp_s_Can_t_join_thread_1, __pyx_k_Can_t_join_thread_1, sizeof(__pyx_k_Can_t_join_thread_1), 0, 0, 1, 0},
   {&__pyx_kp_s_Comp_pyx, __pyx_k_Comp_pyx, sizeof(__pyx_k_Comp_pyx), 0, 0, 1, 0},
+  {&__pyx_kp_s_Could_not_open_shared_library, __pyx_k_Could_not_open_shared_library, sizeof(__pyx_k_Could_not_open_shared_library), 0, 0, 1, 0},
+  {&__pyx_kp_s_Main_Joining_thread, __pyx_k_Main_Joining_thread, sizeof(__pyx_k_Main_Joining_thread), 0, 0, 1, 0},
   {&__pyx_kp_s_Sending_C_array_to_Python_as_tup, __pyx_k_Sending_C_array_to_Python_as_tup, sizeof(__pyx_k_Sending_C_array_to_Python_as_tup), 0, 0, 1, 0},
-  {&__pyx_kp_s_Sending_tuple_to_C_as_C_array, __pyx_k_Sending_tuple_to_C_as_C_array, sizeof(__pyx_k_Sending_tuple_to_C_as_C_array), 0, 0, 1, 0},
-  {&__pyx_n_s_append, __pyx_k_append, sizeof(__pyx_k_append), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_end, __pyx_k_end, sizeof(__pyx_k_end), 0, 0, 1, 1},
+  {&__pyx_n_s_exit, __pyx_k_exit, sizeof(__pyx_k_exit), 0, 0, 1, 1},
   {&__pyx_n_s_file, __pyx_k_file, sizeof(__pyx_k_file), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
@@ -1660,7 +1775,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 22, __pyx_L1_error)
+  __pyx_builtin_exit = __Pyx_GetBuiltinName(__pyx_n_s_exit); if (!__pyx_builtin_exit) __PYX_ERR(0, 20, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 33, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -1669,12 +1785,27 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
 static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
+
+  /* "comp.pyx":20
+ * cpdef error(msg):
+ *     print(msg + ": " + strerror(errno))
+ *     exit(1)             # <<<<<<<<<<<<<<
+ * 
+ * # Main Cython function to call C
+ */
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_int_1); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 20, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__2);
+  __Pyx_GIVEREF(__pyx_tuple__2);
   __Pyx_RefNannyFinishContext();
   return 0;
+  __pyx_L1_error:;
+  __Pyx_RefNannyFinishContext();
+  return -1;
 }
 
 static CYTHON_SMALL_CODE int __Pyx_InitGlobals(void) {
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  __pyx_int_1 = PyInt_FromLong(1); if (unlikely(!__pyx_int_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -2024,6 +2155,26 @@ static PyObject *__Pyx_GetBuiltinName(PyObject *name) {
     return result;
 }
 
+/* PyObjectCall */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
+    PyObject *result;
+    ternaryfunc call = Py_TYPE(func)->tp_call;
+    if (unlikely(!call))
+        return PyObject_Call(func, arg, kw);
+    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
+        return NULL;
+    result = (*call)(func, arg, kw);
+    Py_LeaveRecursiveCall();
+    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
+        PyErr_SetString(
+            PyExc_SystemError,
+            "NULL result without error in PyObject_Call");
+    }
+    return result;
+}
+#endif
+
 /* GetItemInt */
 static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
     PyObject *r;
@@ -2109,384 +2260,6 @@ static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, 
     }
 #endif
     return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
-}
-
-/* PyCFunctionFastCall */
-#if CYTHON_FAST_PYCCALL
-static CYTHON_INLINE PyObject * __Pyx_PyCFunction_FastCall(PyObject *func_obj, PyObject **args, Py_ssize_t nargs) {
-    PyCFunctionObject *func = (PyCFunctionObject*)func_obj;
-    PyCFunction meth = PyCFunction_GET_FUNCTION(func);
-    PyObject *self = PyCFunction_GET_SELF(func);
-    int flags = PyCFunction_GET_FLAGS(func);
-    assert(PyCFunction_Check(func));
-    assert(METH_FASTCALL == (flags & ~(METH_CLASS | METH_STATIC | METH_COEXIST | METH_KEYWORDS | METH_STACKLESS)));
-    assert(nargs >= 0);
-    assert(nargs == 0 || args != NULL);
-    /* _PyCFunction_FastCallDict() must not be called with an exception set,
-       because it may clear it (directly or indirectly) and so the
-       caller loses its exception */
-    assert(!PyErr_Occurred());
-    if ((PY_VERSION_HEX < 0x030700A0) || unlikely(flags & METH_KEYWORDS)) {
-        return (*((__Pyx_PyCFunctionFastWithKeywords)(void*)meth)) (self, args, nargs, NULL);
-    } else {
-        return (*((__Pyx_PyCFunctionFast)(void*)meth)) (self, args, nargs);
-    }
-}
-#endif
-
-/* PyFunctionFastCall */
-#if CYTHON_FAST_PYCALL
-static PyObject* __Pyx_PyFunction_FastCallNoKw(PyCodeObject *co, PyObject **args, Py_ssize_t na,
-                                               PyObject *globals) {
-    PyFrameObject *f;
-    PyThreadState *tstate = __Pyx_PyThreadState_Current;
-    PyObject **fastlocals;
-    Py_ssize_t i;
-    PyObject *result;
-    assert(globals != NULL);
-    /* XXX Perhaps we should create a specialized
-       PyFrame_New() that doesn't take locals, but does
-       take builtins without sanity checking them.
-       */
-    assert(tstate != NULL);
-    f = PyFrame_New(tstate, co, globals, NULL);
-    if (f == NULL) {
-        return NULL;
-    }
-    fastlocals = __Pyx_PyFrame_GetLocalsplus(f);
-    for (i = 0; i < na; i++) {
-        Py_INCREF(*args);
-        fastlocals[i] = *args++;
-    }
-    result = PyEval_EvalFrameEx(f,0);
-    ++tstate->recursion_depth;
-    Py_DECREF(f);
-    --tstate->recursion_depth;
-    return result;
-}
-#if 1 || PY_VERSION_HEX < 0x030600B1
-static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, Py_ssize_t nargs, PyObject *kwargs) {
-    PyCodeObject *co = (PyCodeObject *)PyFunction_GET_CODE(func);
-    PyObject *globals = PyFunction_GET_GLOBALS(func);
-    PyObject *argdefs = PyFunction_GET_DEFAULTS(func);
-    PyObject *closure;
-#if PY_MAJOR_VERSION >= 3
-    PyObject *kwdefs;
-#endif
-    PyObject *kwtuple, **k;
-    PyObject **d;
-    Py_ssize_t nd;
-    Py_ssize_t nk;
-    PyObject *result;
-    assert(kwargs == NULL || PyDict_Check(kwargs));
-    nk = kwargs ? PyDict_Size(kwargs) : 0;
-    if (Py_EnterRecursiveCall((char*)" while calling a Python object")) {
-        return NULL;
-    }
-    if (
-#if PY_MAJOR_VERSION >= 3
-            co->co_kwonlyargcount == 0 &&
-#endif
-            likely(kwargs == NULL || nk == 0) &&
-            co->co_flags == (CO_OPTIMIZED | CO_NEWLOCALS | CO_NOFREE)) {
-        if (argdefs == NULL && co->co_argcount == nargs) {
-            result = __Pyx_PyFunction_FastCallNoKw(co, args, nargs, globals);
-            goto done;
-        }
-        else if (nargs == 0 && argdefs != NULL
-                 && co->co_argcount == Py_SIZE(argdefs)) {
-            /* function called with no arguments, but all parameters have
-               a default value: use default values as arguments .*/
-            args = &PyTuple_GET_ITEM(argdefs, 0);
-            result =__Pyx_PyFunction_FastCallNoKw(co, args, Py_SIZE(argdefs), globals);
-            goto done;
-        }
-    }
-    if (kwargs != NULL) {
-        Py_ssize_t pos, i;
-        kwtuple = PyTuple_New(2 * nk);
-        if (kwtuple == NULL) {
-            result = NULL;
-            goto done;
-        }
-        k = &PyTuple_GET_ITEM(kwtuple, 0);
-        pos = i = 0;
-        while (PyDict_Next(kwargs, &pos, &k[i], &k[i+1])) {
-            Py_INCREF(k[i]);
-            Py_INCREF(k[i+1]);
-            i += 2;
-        }
-        nk = i / 2;
-    }
-    else {
-        kwtuple = NULL;
-        k = NULL;
-    }
-    closure = PyFunction_GET_CLOSURE(func);
-#if PY_MAJOR_VERSION >= 3
-    kwdefs = PyFunction_GET_KW_DEFAULTS(func);
-#endif
-    if (argdefs != NULL) {
-        d = &PyTuple_GET_ITEM(argdefs, 0);
-        nd = Py_SIZE(argdefs);
-    }
-    else {
-        d = NULL;
-        nd = 0;
-    }
-#if PY_MAJOR_VERSION >= 3
-    result = PyEval_EvalCodeEx((PyObject*)co, globals, (PyObject *)NULL,
-                               args, (int)nargs,
-                               k, (int)nk,
-                               d, (int)nd, kwdefs, closure);
-#else
-    result = PyEval_EvalCodeEx(co, globals, (PyObject *)NULL,
-                               args, (int)nargs,
-                               k, (int)nk,
-                               d, (int)nd, closure);
-#endif
-    Py_XDECREF(kwtuple);
-done:
-    Py_LeaveRecursiveCall();
-    return result;
-}
-#endif
-#endif
-
-/* PyObjectCall */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
-    PyObject *result;
-    ternaryfunc call = Py_TYPE(func)->tp_call;
-    if (unlikely(!call))
-        return PyObject_Call(func, arg, kw);
-    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
-        return NULL;
-    result = (*call)(func, arg, kw);
-    Py_LeaveRecursiveCall();
-    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
-        PyErr_SetString(
-            PyExc_SystemError,
-            "NULL result without error in PyObject_Call");
-    }
-    return result;
-}
-#endif
-
-/* PyObjectCall2Args */
-static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2) {
-    PyObject *args, *result = NULL;
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(function)) {
-        PyObject *args[2] = {arg1, arg2};
-        return __Pyx_PyFunction_FastCall(function, args, 2);
-    }
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(function)) {
-        PyObject *args[2] = {arg1, arg2};
-        return __Pyx_PyCFunction_FastCall(function, args, 2);
-    }
-    #endif
-    args = PyTuple_New(2);
-    if (unlikely(!args)) goto done;
-    Py_INCREF(arg1);
-    PyTuple_SET_ITEM(args, 0, arg1);
-    Py_INCREF(arg2);
-    PyTuple_SET_ITEM(args, 1, arg2);
-    Py_INCREF(function);
-    result = __Pyx_PyObject_Call(function, args, NULL);
-    Py_DECREF(args);
-    Py_DECREF(function);
-done:
-    return result;
-}
-
-/* PyObjectCallMethO */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg) {
-    PyObject *self, *result;
-    PyCFunction cfunc;
-    cfunc = PyCFunction_GET_FUNCTION(func);
-    self = PyCFunction_GET_SELF(func);
-    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
-        return NULL;
-    result = cfunc(self, arg);
-    Py_LeaveRecursiveCall();
-    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
-        PyErr_SetString(
-            PyExc_SystemError,
-            "NULL result without error in PyObject_Call");
-    }
-    return result;
-}
-#endif
-
-/* PyObjectCallOneArg */
-#if CYTHON_COMPILING_IN_CPYTHON
-static PyObject* __Pyx__PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-    PyObject *result;
-    PyObject *args = PyTuple_New(1);
-    if (unlikely(!args)) return NULL;
-    Py_INCREF(arg);
-    PyTuple_SET_ITEM(args, 0, arg);
-    result = __Pyx_PyObject_Call(func, args, NULL);
-    Py_DECREF(args);
-    return result;
-}
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-#if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(func)) {
-        return __Pyx_PyFunction_FastCall(func, &arg, 1);
-    }
-#endif
-    if (likely(PyCFunction_Check(func))) {
-        if (likely(PyCFunction_GET_FLAGS(func) & METH_O)) {
-            return __Pyx_PyObject_CallMethO(func, arg);
-#if CYTHON_FAST_PYCCALL
-        } else if (__Pyx_PyFastCFunction_Check(func)) {
-            return __Pyx_PyCFunction_FastCall(func, &arg, 1);
-#endif
-        }
-    }
-    return __Pyx__PyObject_CallOneArg(func, arg);
-}
-#else
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg) {
-    PyObject *result;
-    PyObject *args = PyTuple_Pack(1, arg);
-    if (unlikely(!args)) return NULL;
-    result = __Pyx_PyObject_Call(func, args, NULL);
-    Py_DECREF(args);
-    return result;
-}
-#endif
-
-/* PyObjectGetMethod */
-static int __Pyx_PyObject_GetMethod(PyObject *obj, PyObject *name, PyObject **method) {
-    PyObject *attr;
-#if CYTHON_UNPACK_METHODS && CYTHON_COMPILING_IN_CPYTHON && CYTHON_USE_PYTYPE_LOOKUP
-    PyTypeObject *tp = Py_TYPE(obj);
-    PyObject *descr;
-    descrgetfunc f = NULL;
-    PyObject **dictptr, *dict;
-    int meth_found = 0;
-    assert (*method == NULL);
-    if (unlikely(tp->tp_getattro != PyObject_GenericGetAttr)) {
-        attr = __Pyx_PyObject_GetAttrStr(obj, name);
-        goto try_unpack;
-    }
-    if (unlikely(tp->tp_dict == NULL) && unlikely(PyType_Ready(tp) < 0)) {
-        return 0;
-    }
-    descr = _PyType_Lookup(tp, name);
-    if (likely(descr != NULL)) {
-        Py_INCREF(descr);
-#if PY_MAJOR_VERSION >= 3
-        #ifdef __Pyx_CyFunction_USED
-        if (likely(PyFunction_Check(descr) || (Py_TYPE(descr) == &PyMethodDescr_Type) || __Pyx_CyFunction_Check(descr)))
-        #else
-        if (likely(PyFunction_Check(descr) || (Py_TYPE(descr) == &PyMethodDescr_Type)))
-        #endif
-#else
-        #ifdef __Pyx_CyFunction_USED
-        if (likely(PyFunction_Check(descr) || __Pyx_CyFunction_Check(descr)))
-        #else
-        if (likely(PyFunction_Check(descr)))
-        #endif
-#endif
-        {
-            meth_found = 1;
-        } else {
-            f = Py_TYPE(descr)->tp_descr_get;
-            if (f != NULL && PyDescr_IsData(descr)) {
-                attr = f(descr, obj, (PyObject *)Py_TYPE(obj));
-                Py_DECREF(descr);
-                goto try_unpack;
-            }
-        }
-    }
-    dictptr = _PyObject_GetDictPtr(obj);
-    if (dictptr != NULL && (dict = *dictptr) != NULL) {
-        Py_INCREF(dict);
-        attr = __Pyx_PyDict_GetItemStr(dict, name);
-        if (attr != NULL) {
-            Py_INCREF(attr);
-            Py_DECREF(dict);
-            Py_XDECREF(descr);
-            goto try_unpack;
-        }
-        Py_DECREF(dict);
-    }
-    if (meth_found) {
-        *method = descr;
-        return 1;
-    }
-    if (f != NULL) {
-        attr = f(descr, obj, (PyObject *)Py_TYPE(obj));
-        Py_DECREF(descr);
-        goto try_unpack;
-    }
-    if (descr != NULL) {
-        *method = descr;
-        return 0;
-    }
-    PyErr_Format(PyExc_AttributeError,
-#if PY_MAJOR_VERSION >= 3
-                 "'%.50s' object has no attribute '%U'",
-                 tp->tp_name, name);
-#else
-                 "'%.50s' object has no attribute '%.400s'",
-                 tp->tp_name, PyString_AS_STRING(name));
-#endif
-    return 0;
-#else
-    attr = __Pyx_PyObject_GetAttrStr(obj, name);
-    goto try_unpack;
-#endif
-try_unpack:
-#if CYTHON_UNPACK_METHODS
-    if (likely(attr) && PyMethod_Check(attr) && likely(PyMethod_GET_SELF(attr) == obj)) {
-        PyObject *function = PyMethod_GET_FUNCTION(attr);
-        Py_INCREF(function);
-        Py_DECREF(attr);
-        *method = function;
-        return 1;
-    }
-#endif
-    *method = attr;
-    return 0;
-}
-
-/* PyObjectCallMethod1 */
-static PyObject* __Pyx__PyObject_CallMethod1(PyObject* method, PyObject* arg) {
-    PyObject *result = __Pyx_PyObject_CallOneArg(method, arg);
-    Py_DECREF(method);
-    return result;
-}
-static PyObject* __Pyx_PyObject_CallMethod1(PyObject* obj, PyObject* method_name, PyObject* arg) {
-    PyObject *method = NULL, *result;
-    int is_method = __Pyx_PyObject_GetMethod(obj, method_name, &method);
-    if (likely(is_method)) {
-        result = __Pyx_PyObject_Call2Args(method, obj, arg);
-        Py_DECREF(method);
-        return result;
-    }
-    if (unlikely(!method)) return NULL;
-    return __Pyx__PyObject_CallMethod1(method, arg);
-}
-
-/* append */
-static CYTHON_INLINE int __Pyx_PyObject_Append(PyObject* L, PyObject* x) {
-    if (likely(PyList_CheckExact(L))) {
-        if (unlikely(__Pyx_PyList_Append(L, x) < 0)) return -1;
-    } else {
-        PyObject* retval = __Pyx_PyObject_CallMethod1(L, __pyx_n_s_append, x);
-        if (unlikely(!retval))
-            return -1;
-        Py_DECREF(retval);
-    }
-    return 0;
 }
 
 /* PyDictVersioning */
