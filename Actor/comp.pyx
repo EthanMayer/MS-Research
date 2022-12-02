@@ -5,6 +5,7 @@
 
 # Import functions from the c standard library
 from libc.stdlib cimport malloc, free
+from posix.dlfcn cimport dlopen, dlsym
 
 # Import the interface function declaration from the header file
 cdef extern from "cthreads.h":
@@ -21,8 +22,10 @@ cpdef tuple main(tup):
     for i in range(n):
         arr[i] = tup[i]
 
-    # Allocate array for return values
+    # Array for return values
     cdef int* arr2
+
+
 
     # Call C file
     print("Sending tuple to C as C array")
