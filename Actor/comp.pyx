@@ -22,7 +22,7 @@ cpdef tuple main(tup):
         arr[i] = tup[i]
 
     # Allocate array for return values
-    cdef int* arr2 = <int*> malloc(n * sizeof(int))
+    cdef int* arr2
 
     # Call C file
     print("Sending tuple to C as C array")

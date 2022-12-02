@@ -1310,9 +1310,9 @@ static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_pf_4comp_main(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_tup); /* proto */
 /* Late includes */
 
-/* "comp.pyx":13
+/* "comp.pyx":14
  * 
- * # main Cython function to call C
+ * # Main Cython function to call C
  * cpdef tuple main(tup):             # <<<<<<<<<<<<<<
  *     print("======== Comp.pyx ========")
  * 
@@ -1340,26 +1340,26 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("main", 0);
 
-  /* "comp.pyx":14
- * # main Cython function to call C
+  /* "comp.pyx":15
+ * # Main Cython function to call C
  * cpdef tuple main(tup):
  *     print("======== Comp.pyx ========")             # <<<<<<<<<<<<<<
  * 
  *     # Convert tuple to C array
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Comp_pyx) < 0) __PYX_ERR(0, 14, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Comp_pyx) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
 
-  /* "comp.pyx":17
+  /* "comp.pyx":18
  * 
  *     # Convert tuple to C array
  *     cdef int n = len(tup)             # <<<<<<<<<<<<<<
  *     cdef int* arr = <int*> malloc(n * sizeof(int))
  *     cdef int i = 0
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_tup); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_tup); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 18, __pyx_L1_error)
   __pyx_v_n = __pyx_t_1;
 
-  /* "comp.pyx":18
+  /* "comp.pyx":19
  *     # Convert tuple to C array
  *     cdef int n = len(tup)
  *     cdef int* arr = <int*> malloc(n * sizeof(int))             # <<<<<<<<<<<<<<
@@ -1368,7 +1368,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  */
   __pyx_v_arr = ((int *)malloc((__pyx_v_n * (sizeof(int)))));
 
-  /* "comp.pyx":19
+  /* "comp.pyx":20
  *     cdef int n = len(tup)
  *     cdef int* arr = <int*> malloc(n * sizeof(int))
  *     cdef int i = 0             # <<<<<<<<<<<<<<
@@ -1377,7 +1377,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  */
   __pyx_v_i = 0;
 
-  /* "comp.pyx":20
+  /* "comp.pyx":21
  *     cdef int* arr = <int*> malloc(n * sizeof(int))
  *     cdef int i = 0
  *     for i in range(n):             # <<<<<<<<<<<<<<
@@ -1389,59 +1389,50 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
   for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
     __pyx_v_i = __pyx_t_4;
 
-    /* "comp.pyx":21
+    /* "comp.pyx":22
  *     cdef int i = 0
  *     for i in range(n):
  *         arr[i] = tup[i]             # <<<<<<<<<<<<<<
  * 
  *     # Allocate array for return values
  */
-    __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_tup, __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 21, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_tup, __pyx_v_i, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 22, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 22, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     (__pyx_v_arr[__pyx_v_i]) = __pyx_t_6;
   }
 
-  /* "comp.pyx":24
- * 
- *     # Allocate array for return values
- *     cdef int* arr2 = <int*> malloc(n * sizeof(int))             # <<<<<<<<<<<<<<
- * 
- *     # Call C file
- */
-  __pyx_v_arr2 = ((int *)malloc((__pyx_v_n * (sizeof(int)))));
-
-  /* "comp.pyx":27
+  /* "comp.pyx":28
  * 
  *     # Call C file
  *     print("Sending tuple to C as C array")             # <<<<<<<<<<<<<<
  *     try:
  *         arr2 = start_test(arr, n)
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Sending_tuple_to_C_as_C_array) < 0) __PYX_ERR(0, 27, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Sending_tuple_to_C_as_C_array) < 0) __PYX_ERR(0, 28, __pyx_L1_error)
 
-  /* "comp.pyx":28
+  /* "comp.pyx":29
  *     # Call C file
  *     print("Sending tuple to C as C array")
  *     try:             # <<<<<<<<<<<<<<
  *         arr2 = start_test(arr, n)
- *     #except KeyboardInterrupt:
+ *     finally:
  */
   /*try:*/ {
 
-    /* "comp.pyx":29
+    /* "comp.pyx":30
  *     print("Sending tuple to C as C array")
  *     try:
  *         arr2 = start_test(arr, n)             # <<<<<<<<<<<<<<
- *     #except KeyboardInterrupt:
  *     finally:
+ *         free(arr)
  */
     __pyx_v_arr2 = start_test(__pyx_v_arr, __pyx_v_n);
   }
 
   /* "comp.pyx":32
- *     #except KeyboardInterrupt:
+ *         arr2 = start_test(arr, n)
  *     finally:
  *         free(arr)             # <<<<<<<<<<<<<<
  * 
@@ -1544,9 +1535,9 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
   __pyx_r = ((PyObject*)__pyx_v_tup2);
   goto __pyx_L0;
 
-  /* "comp.pyx":13
+  /* "comp.pyx":14
  * 
- * # main Cython function to call C
+ * # Main Cython function to call C
  * cpdef tuple main(tup):             # <<<<<<<<<<<<<<
  *     print("======== Comp.pyx ========")
  * 
@@ -1587,7 +1578,7 @@ static PyObject *__pyx_pf_4comp_main(CYTHON_UNUSED PyObject *__pyx_self, PyObjec
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("main", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_4comp_main(__pyx_v_tup, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_4comp_main(__pyx_v_tup, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1666,7 +1657,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 20, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 21, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
