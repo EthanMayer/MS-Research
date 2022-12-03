@@ -9,6 +9,7 @@ from posix.dlfcn cimport dlopen, dlsym, RTLD_LAZY
 from libc.string cimport strerror
 from libc.errno cimport errno
 from pthread cimport pthread_create, pthread_join, pthread_t
+cimport zmq
 
 # Import the interface function declaration from the header file
 cdef extern from "cthreads.h":
@@ -34,8 +35,12 @@ cpdef tuple main(tup):
         arr[i] = tup[i]
 
     # Create main thread pair socket
+    context = zmq.Context()
+    socket = context.socket(zmq.PAIR)
+    socket.bind("tcp://127.0.0.1:5556")
 
     # Create entry for thread1's socket and add it to dictionary
+    portDict["thread1"] = socket
 
     # Open .so shared library and grab function from it
     cdef char* libpath = "funcBody.so";
@@ -51,14 +56,21 @@ cpdef tuple main(tup):
         error("Can't create thread")
 
     # Receive "Ready" message to know the thread is ready
+    string = socket.recv()
+    print("Main received: " + str(string))
 
     # Send array size via socket to threads
+    socket.send_pyobj(n)
 
     # Send array via socket to thread
+    socket.send(arr)
 
     # Receive array back via socket from thread
+    arr2 = socket.recv()
 
     # Clean up socket
+    socket.close()
+    context.term()
 
     # Join thread
     print("Main: Joining thread\n")
