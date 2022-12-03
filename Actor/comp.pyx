@@ -35,12 +35,14 @@ cpdef tuple main(tup):
         arr[i] = tup[i]
 
     # Create main thread pair socket
-    context = zmq.Context()
-    socket = context.socket(zmq.PAIR)
-    socket.bind("tcp://127.0.0.1:5556")
+    cdef void* context = zmq_ctx_new()
+    cdef void* sckt = zmq_socket(context, ZMQ_PAIR)
+
+    if (zmq_bind(sckt, "tcp://127.0.0.1:5556") != 0):
+        error("Could not bind main receiver socket")
 
     # Create entry for thread1's socket and add it to dictionary
-    portDict["thread1"] = socket
+    portDict["thread1"] = sckt
 
     # Open .so shared library and grab function from it
     cdef char* libpath = "funcBody.so";
@@ -56,21 +58,33 @@ cpdef tuple main(tup):
         error("Can't create thread")
 
     # Receive "Ready" message to know the thread is ready
-    string = socket.recv()
-    print("Main received: " + str(string))
+    cdef char buf[6]
+    if (zmq_recv(sckt, buf, sizeof(buf), 0) == -1):
+        error("Could not receive on main receive socket")
+    print("Main received: " + str(buf))
 
     # Send array size via socket to threads
-    socket.send_pyobj(n)
+    cdef char sizeBuf[256]
+    sprintf(sizeBuf, "%d", n)
+    if (zmq_send(sckt, sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):
+        error("Pair send buffer length incorrect\n")
+    print("Main: Sent array size")
+    # socket.send_pyobj(n)
 
     # Send array via socket to thread
-    socket.send(arr)
+    if (zmq_send(sckt, arr, arrSize * sizeof(int), 0) != arrSize * sizeof(int)):
+        error("Pair send buffer length incorrect\n")
+    print("Main: Sent array")
 
     # Receive array back via socket from thread
-    arr2 = socket.recv()
+    if (zmq_recv(sckt, arr2, arrSize * sizeof(int), 0) == -1):
+        error("Could not receive on main receive socket")
+    for i in range(n):
+        arr2[i] = tup2[i]
 
     # Clean up socket
-    socket.close()
-    context.term()
+    zmq_close(sckt)
+    zmq_ctx_destroy(context)
 
     # Join thread
     print("Main: Joining thread\n")
@@ -94,5 +108,4 @@ cpdef tuple main(tup):
     # Return tuple to Python
     print("======== Comp.pyx ========")
     print("Sending C array to Python as tuple")
-    tup2 = []
     return tup2
