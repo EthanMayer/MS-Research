@@ -22,12 +22,15 @@ cpdef error(msg):
 cdef void free_ptr(object cap):
     free(PyCapsule_GetPointer(cap,PyCapsule_GetName(cap)))
 
-# Wrap void* socket pointer in a PyCapsule and store in Python dictionary
+# Wrap a void* socket pointer in a PyCapsule and store in a Python dictionary
 cdef void store_sckt(const char* name, void* sckt, portDict):
     portDict[name] = PyCapsule_New(sckt, name, NULL)
 
+# Unrwap a void* socket pointer stored in a PyCapsule that is stored in a Python dictionary
 cdef void* get_sckt(const char* name, portDict):
-    return PyCapsule_GetPointer(portDict[name], name)
+    # First check to ensure capsule is valid
+    if (PyCapsule_IsValid(portDict[name], name)):
+        return PyCapsule_GetPointer(portDict[name], name)
 
 # Main Cython function to call C
 cpdef tuple main(tup):
@@ -68,24 +71,24 @@ cpdef tuple main(tup):
 
     # Receive "Ready" message to know the thread is ready
     cdef char buf[6]
-    if (z.zmq_recvbuf(sckt, buf, sizeof(buf), 0) == -1):
+    if (z.zmq_recvbuf(get_sckt("Thread1", portDict), buf, sizeof(buf), 0) == -1):
         error("Could not receive on main receive socket")
     print("Main received: " + str(buf))
 
     # Send array size via socket to threads
     cdef char sizeBuf[256]
     sprintf(sizeBuf, "%d", n)
-    if (z.zmq_sendbuf(sckt, sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):
+    if (z.zmq_sendbuf(get_sckt("Thread1", portDict), sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):
         error("Pair send buffer length incorrect\n")
     print("Main: Sent array size")
 
     # Send array via socket to thread
-    if (z.zmq_sendbuf(sckt, arr, n * sizeof(int), 0) != n * sizeof(int)):
+    if (z.zmq_sendbuf(get_sckt("Thread1", portDict), arr, n * sizeof(int), 0) != n * sizeof(int)):
         error("Pair send buffer length incorrect\n")
     print("Main: Sent array")
 
     # Receive array back via socket from thread
-    if (z.zmq_recvbuf(sckt, arr2, n * sizeof(int), 0) == -1):
+    if (z.zmq_recvbuf(get_sckt("Thread1", portDict), arr2, n * sizeof(int), 0) == -1):
         error("Could not receive on main receive socket")
     
     # Convert received array to Python tuple
@@ -97,7 +100,7 @@ cpdef tuple main(tup):
     free(arr2)
 
     # Clean up socket
-    z.zmq_close(sckt)
+    z.zmq_close(get_sckt("Thread1", portDict))
     z.zmq_ctx_destroy(context)
 
     # Join thread
