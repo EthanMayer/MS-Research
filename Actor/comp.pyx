@@ -51,45 +51,45 @@ cpdef tuple main(tup):
     cdef void* sckt = z.zmq_socket(context, z.ZMQ_PAIR)
 
     if (z.zmq_bind(sckt, "tcp://127.0.0.1:5556") != 0):
-        error("Could not bind main receiver socket")
+        error("Could not bind comp.pyx PAIR socket address")
 
     # Store socket in dictionary
     store_sckt("Thread1", sckt, portDict)
 
     # Open .so shared library and grab function from it
     cdef char* libpath = "funcBody.so";
-    cdef void *libhandle = dlopen(libpath, RTLD_LAZY);
+    cdef void* libhandle = dlopen(libpath, RTLD_LAZY);
 
     if (libhandle == NULL):
-        error("Could not open shared library")
+        error("Could not open shared library in comp.pyx")
 
     # Create thread with the .so function as body
     cdef void *thread1 = dlsym(libhandle, "thread1")
 
     if (pthread_create(&t1, NULL, thread1, NULL) == -1):
-        error("Can't create thread")
+        error("Could not create thread in comp.pyx")
 
     # Receive "Ready" message to know the thread is ready
     cdef char buf[6]
     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), buf, sizeof(buf), 0) == -1):
-        error("Could not receive on main receive socket")
+        error("Could not receive on comp.pyx PAIR socket")
     print("Main received: " + str(buf))
 
     # Send array size via socket to threads
     cdef char sizeBuf[256]
     sprintf(sizeBuf, "%d", n)
     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):
-        error("Pair send buffer length incorrect\n")
+        error("Comp.pyx PAIR send message buffer length incorrect")
     print("Main: Sent array size")
 
     # Send array via socket to thread
     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), arr, n * sizeof(int), 0) != n * sizeof(int)):
-        error("Pair send buffer length incorrect\n")
+        error("Comp.pyx PAIR send message buffer length incorrect\n")
     print("Main: Sent array")
 
     # Receive array back via socket from thread
     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), arr2, n * sizeof(int), 0) == -1):
-        error("Could not receive on main receive socket")
+        error("Could not receive on comp.pyx PAIR socket")
     
     # Convert received array to Python tuple
     tup2 = []
@@ -100,13 +100,15 @@ cpdef tuple main(tup):
     free(arr2)
 
     # Clean up socket
-    z.zmq_close(get_sckt("Thread1", portDict))
-    z.zmq_ctx_destroy(context)
+    if (z.zmq_close(get_sckt("Thread1", portDict)) == -1):
+        error("Could not close comp.pyx PAIR socket")
+    if (z.zmq_ctx_destroy(context) == -1):
+        error("Could not destroy comp.pyx ZMQ context")
 
     # Join thread
     print("Main: Joining thread")
     if (pthread_join(t1, NULL) == -1):
-        error("Can't join thread 1")
+        error("Could not join thread1 in comp.pyx")
 
     # Return tuple to Python
     print("Sending C array to Python as tuple")

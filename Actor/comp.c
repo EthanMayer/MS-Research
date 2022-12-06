@@ -1597,29 +1597,35 @@ static const char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static const char __pyx_k_Main_received[] = "Main received: ";
 static const char __pyx_k_Main_Sent_array[] = "Main: Sent array";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
-static const char __pyx_k_Can_t_create_thread[] = "Can't create thread";
-static const char __pyx_k_Can_t_join_thread_1[] = "Can't join thread 1";
 static const char __pyx_k_Main_Joining_thread[] = "Main: Joining thread";
 static const char __pyx_k_Main_Received_tuple[] = "Main: Received tuple: ";
 static const char __pyx_k_Main_Sent_array_size[] = "Main: Sent array size";
-static const char __pyx_k_Could_not_open_shared_library[] = "Could not open shared library";
-static const char __pyx_k_Could_not_bind_main_receiver_soc[] = "Could not bind main receiver socket";
-static const char __pyx_k_Could_not_receive_on_main_receiv[] = "Could not receive on main receive socket";
-static const char __pyx_k_Pair_send_buffer_length_incorrec[] = "Pair send buffer length incorrect\n";
+static const char __pyx_k_Could_not_create_thread_in_comp[] = "Could not create thread in comp.pyx";
+static const char __pyx_k_Comp_pyx_PAIR_send_message_buffe[] = "Comp.pyx PAIR send message buffer length incorrect";
+static const char __pyx_k_Could_not_bind_comp_pyx_PAIR_soc[] = "Could not bind comp.pyx PAIR socket address";
+static const char __pyx_k_Could_not_close_comp_pyx_PAIR_so[] = "Could not close comp.pyx PAIR socket";
+static const char __pyx_k_Could_not_destroy_comp_pyx_ZMQ_c[] = "Could not destroy comp.pyx ZMQ context";
+static const char __pyx_k_Could_not_join_thread1_in_comp_p[] = "Could not join thread1 in comp.pyx";
+static const char __pyx_k_Could_not_open_shared_library_in[] = "Could not open shared library in comp.pyx";
+static const char __pyx_k_Could_not_receive_on_comp_pyx_PA[] = "Could not receive on comp.pyx PAIR socket";
 static const char __pyx_k_Sending_C_array_to_Python_as_tup[] = "Sending C array to Python as tuple";
+static const char __pyx_k_Comp_pyx_PAIR_send_message_buffe_2[] = "Comp.pyx PAIR send message buffer length incorrect\n";
 static PyObject *__pyx_kp_s_;
-static PyObject *__pyx_kp_s_Can_t_create_thread;
-static PyObject *__pyx_kp_s_Can_t_join_thread_1;
 static PyObject *__pyx_kp_s_Comp_pyx;
-static PyObject *__pyx_kp_s_Could_not_bind_main_receiver_soc;
-static PyObject *__pyx_kp_s_Could_not_open_shared_library;
-static PyObject *__pyx_kp_s_Could_not_receive_on_main_receiv;
+static PyObject *__pyx_kp_s_Comp_pyx_PAIR_send_message_buffe;
+static PyObject *__pyx_kp_s_Comp_pyx_PAIR_send_message_buffe_2;
+static PyObject *__pyx_kp_s_Could_not_bind_comp_pyx_PAIR_soc;
+static PyObject *__pyx_kp_s_Could_not_close_comp_pyx_PAIR_so;
+static PyObject *__pyx_kp_s_Could_not_create_thread_in_comp;
+static PyObject *__pyx_kp_s_Could_not_destroy_comp_pyx_ZMQ_c;
+static PyObject *__pyx_kp_s_Could_not_join_thread1_in_comp_p;
+static PyObject *__pyx_kp_s_Could_not_open_shared_library_in;
+static PyObject *__pyx_kp_s_Could_not_receive_on_comp_pyx_PA;
 static PyObject *__pyx_kp_s_Main_Joining_thread;
 static PyObject *__pyx_kp_s_Main_Received_tuple;
 static PyObject *__pyx_kp_s_Main_Sent_array;
 static PyObject *__pyx_kp_s_Main_Sent_array_size;
 static PyObject *__pyx_kp_s_Main_received;
-static PyObject *__pyx_kp_s_Pair_send_buffer_length_incorrec;
 static PyObject *__pyx_kp_s_Sending_C_array_to_Python_as_tup;
 static PyObject *__pyx_n_s_append;
 static PyObject *__pyx_n_s_cline_in_traceback;
@@ -2072,7 +2078,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  *     cdef void* sckt = z.zmq_socket(context, z.ZMQ_PAIR)
  * 
  *     if (z.zmq_bind(sckt, "tcp://127.0.0.1:5556") != 0):             # <<<<<<<<<<<<<<
- *         error("Could not bind main receiver socket")
+ *         error("Could not bind comp.pyx PAIR socket address")
  * 
  */
   __pyx_t_7 = ((zmq_bind(__pyx_v_sckt, ((char *)"tcp://127.0.0.1:5556")) != 0) != 0);
@@ -2081,11 +2087,11 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
     /* "comp.pyx":54
  * 
  *     if (z.zmq_bind(sckt, "tcp://127.0.0.1:5556") != 0):
- *         error("Could not bind main receiver socket")             # <<<<<<<<<<<<<<
+ *         error("Could not bind comp.pyx PAIR socket address")             # <<<<<<<<<<<<<<
  * 
  *     # Store socket in dictionary
  */
-    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_bind_main_receiver_soc, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_bind_comp_pyx_PAIR_soc, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -2093,7 +2099,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  *     cdef void* sckt = z.zmq_socket(context, z.ZMQ_PAIR)
  * 
  *     if (z.zmq_bind(sckt, "tcp://127.0.0.1:5556") != 0):             # <<<<<<<<<<<<<<
- *         error("Could not bind main receiver socket")
+ *         error("Could not bind comp.pyx PAIR socket address")
  * 
  */
   }
@@ -2129,7 +2135,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  *     cdef void *libhandle = dlopen(libpath, RTLD_LAZY);
  * 
  *     if (libhandle == NULL):             # <<<<<<<<<<<<<<
- *         error("Could not open shared library")
+ *         error("Could not open shared library in comp.pyx")
  * 
  */
   __pyx_t_7 = ((__pyx_v_libhandle == NULL) != 0);
@@ -2138,11 +2144,11 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
     /* "comp.pyx":64
  * 
  *     if (libhandle == NULL):
- *         error("Could not open shared library")             # <<<<<<<<<<<<<<
+ *         error("Could not open shared library in comp.pyx")             # <<<<<<<<<<<<<<
  * 
  *     # Create thread with the .so function as body
  */
-    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_open_shared_library, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_open_shared_library_in, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -2150,7 +2156,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  *     cdef void *libhandle = dlopen(libpath, RTLD_LAZY);
  * 
  *     if (libhandle == NULL):             # <<<<<<<<<<<<<<
- *         error("Could not open shared library")
+ *         error("Could not open shared library in comp.pyx")
  * 
  */
   }
@@ -2168,7 +2174,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  *     cdef void *thread1 = dlsym(libhandle, "thread1")
  * 
  *     if (pthread_create(&t1, NULL, thread1, NULL) == -1):             # <<<<<<<<<<<<<<
- *         error("Can't create thread")
+ *         error("Could not create thread in comp.pyx")
  * 
  */
   __pyx_t_7 = ((pthread_create((&__pyx_v_t1), NULL, __pyx_v_thread1, NULL) == -1L) != 0);
@@ -2177,11 +2183,11 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
     /* "comp.pyx":70
  * 
  *     if (pthread_create(&t1, NULL, thread1, NULL) == -1):
- *         error("Can't create thread")             # <<<<<<<<<<<<<<
+ *         error("Could not create thread in comp.pyx")             # <<<<<<<<<<<<<<
  * 
  *     # Receive "Ready" message to know the thread is ready
  */
-    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Can_t_create_thread, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_create_thread_in_comp, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -2189,7 +2195,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  *     cdef void *thread1 = dlsym(libhandle, "thread1")
  * 
  *     if (pthread_create(&t1, NULL, thread1, NULL) == -1):             # <<<<<<<<<<<<<<
- *         error("Can't create thread")
+ *         error("Could not create thread in comp.pyx")
  * 
  */
   }
@@ -2198,7 +2204,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  *     # Receive "Ready" message to know the thread is ready
  *     cdef char buf[6]
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), buf, sizeof(buf), 0) == -1):             # <<<<<<<<<<<<<<
- *         error("Could not receive on main receive socket")
+ *         error("Could not receive on comp.pyx PAIR socket")
  *     print("Main received: " + str(buf))
  */
   __pyx_t_7 = ((zmq_recvbuf(__pyx_f_4comp_get_sckt(((char const *)"Thread1"), __pyx_v_portDict), __pyx_v_buf, (sizeof(__pyx_v_buf)), 0) == -1L) != 0);
@@ -2207,11 +2213,11 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
     /* "comp.pyx":75
  *     cdef char buf[6]
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), buf, sizeof(buf), 0) == -1):
- *         error("Could not receive on main receive socket")             # <<<<<<<<<<<<<<
+ *         error("Could not receive on comp.pyx PAIR socket")             # <<<<<<<<<<<<<<
  *     print("Main received: " + str(buf))
  * 
  */
-    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_receive_on_main_receiv, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 75, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_receive_on_comp_pyx_PA, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 75, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -2219,14 +2225,14 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  *     # Receive "Ready" message to know the thread is ready
  *     cdef char buf[6]
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), buf, sizeof(buf), 0) == -1):             # <<<<<<<<<<<<<<
- *         error("Could not receive on main receive socket")
+ *         error("Could not receive on comp.pyx PAIR socket")
  *     print("Main received: " + str(buf))
  */
   }
 
   /* "comp.pyx":76
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), buf, sizeof(buf), 0) == -1):
- *         error("Could not receive on main receive socket")
+ *         error("Could not receive on comp.pyx PAIR socket")
  *     print("Main received: " + str(buf))             # <<<<<<<<<<<<<<
  * 
  *     # Send array size via socket to threads
@@ -2247,7 +2253,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  *     cdef char sizeBuf[256]
  *     sprintf(sizeBuf, "%d", n)             # <<<<<<<<<<<<<<
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):
- *         error("Pair send buffer length incorrect\n")
+ *         error("Comp.pyx PAIR send message buffer length incorrect")
  */
   (void)(sprintf(__pyx_v_sizeBuf, ((char const *)"%d"), __pyx_v_n));
 
@@ -2255,7 +2261,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  *     cdef char sizeBuf[256]
  *     sprintf(sizeBuf, "%d", n)
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):             # <<<<<<<<<<<<<<
- *         error("Pair send buffer length incorrect\n")
+ *         error("Comp.pyx PAIR send message buffer length incorrect")
  *     print("Main: Sent array size")
  */
   __pyx_t_7 = ((zmq_sendbuf(__pyx_f_4comp_get_sckt(((char const *)"Thread1"), __pyx_v_portDict), __pyx_v_sizeBuf, (sizeof(__pyx_v_sizeBuf)), 0) != (sizeof(__pyx_v_sizeBuf))) != 0);
@@ -2264,11 +2270,11 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
     /* "comp.pyx":82
  *     sprintf(sizeBuf, "%d", n)
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):
- *         error("Pair send buffer length incorrect\n")             # <<<<<<<<<<<<<<
+ *         error("Comp.pyx PAIR send message buffer length incorrect")             # <<<<<<<<<<<<<<
  *     print("Main: Sent array size")
  * 
  */
-    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Pair_send_buffer_length_incorrec, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 82, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Comp_pyx_PAIR_send_message_buffe, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 82, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -2276,14 +2282,14 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  *     cdef char sizeBuf[256]
  *     sprintf(sizeBuf, "%d", n)
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):             # <<<<<<<<<<<<<<
- *         error("Pair send buffer length incorrect\n")
+ *         error("Comp.pyx PAIR send message buffer length incorrect")
  *     print("Main: Sent array size")
  */
   }
 
   /* "comp.pyx":83
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):
- *         error("Pair send buffer length incorrect\n")
+ *         error("Comp.pyx PAIR send message buffer length incorrect")
  *     print("Main: Sent array size")             # <<<<<<<<<<<<<<
  * 
  *     # Send array via socket to thread
@@ -2294,7 +2300,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  * 
  *     # Send array via socket to thread
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), arr, n * sizeof(int), 0) != n * sizeof(int)):             # <<<<<<<<<<<<<<
- *         error("Pair send buffer length incorrect\n")
+ *         error("Comp.pyx PAIR send message buffer length incorrect\n")
  *     print("Main: Sent array")
  */
   __pyx_t_7 = ((zmq_sendbuf(__pyx_f_4comp_get_sckt(((char const *)"Thread1"), __pyx_v_portDict), __pyx_v_arr, (__pyx_v_n * (sizeof(int))), 0) != (__pyx_v_n * (sizeof(int)))) != 0);
@@ -2303,11 +2309,11 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
     /* "comp.pyx":87
  *     # Send array via socket to thread
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), arr, n * sizeof(int), 0) != n * sizeof(int)):
- *         error("Pair send buffer length incorrect\n")             # <<<<<<<<<<<<<<
+ *         error("Comp.pyx PAIR send message buffer length incorrect\n")             # <<<<<<<<<<<<<<
  *     print("Main: Sent array")
  * 
  */
-    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Pair_send_buffer_length_incorrec, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 87, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Comp_pyx_PAIR_send_message_buffe_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 87, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -2315,14 +2321,14 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  * 
  *     # Send array via socket to thread
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), arr, n * sizeof(int), 0) != n * sizeof(int)):             # <<<<<<<<<<<<<<
- *         error("Pair send buffer length incorrect\n")
+ *         error("Comp.pyx PAIR send message buffer length incorrect\n")
  *     print("Main: Sent array")
  */
   }
 
   /* "comp.pyx":88
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), arr, n * sizeof(int), 0) != n * sizeof(int)):
- *         error("Pair send buffer length incorrect\n")
+ *         error("Comp.pyx PAIR send message buffer length incorrect\n")
  *     print("Main: Sent array")             # <<<<<<<<<<<<<<
  * 
  *     # Receive array back via socket from thread
@@ -2333,7 +2339,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  * 
  *     # Receive array back via socket from thread
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), arr2, n * sizeof(int), 0) == -1):             # <<<<<<<<<<<<<<
- *         error("Could not receive on main receive socket")
+ *         error("Could not receive on comp.pyx PAIR socket")
  * 
  */
   __pyx_t_7 = ((zmq_recvbuf(__pyx_f_4comp_get_sckt(((char const *)"Thread1"), __pyx_v_portDict), __pyx_v_arr2, (__pyx_v_n * (sizeof(int))), 0) == -1L) != 0);
@@ -2342,11 +2348,11 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
     /* "comp.pyx":92
  *     # Receive array back via socket from thread
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), arr2, n * sizeof(int), 0) == -1):
- *         error("Could not receive on main receive socket")             # <<<<<<<<<<<<<<
+ *         error("Could not receive on comp.pyx PAIR socket")             # <<<<<<<<<<<<<<
  * 
  *     # Convert received array to Python tuple
  */
-    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_receive_on_main_receiv, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 92, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_receive_on_comp_pyx_PA, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 92, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -2354,7 +2360,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  * 
  *     # Receive array back via socket from thread
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), arr2, n * sizeof(int), 0) == -1):             # <<<<<<<<<<<<<<
- *         error("Could not receive on main receive socket")
+ *         error("Could not receive on comp.pyx PAIR socket")
  * 
  */
   }
@@ -2438,75 +2444,117 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
   /* "comp.pyx":103
  * 
  *     # Clean up socket
- *     z.zmq_close(get_sckt("Thread1", portDict))             # <<<<<<<<<<<<<<
- *     z.zmq_ctx_destroy(context)
+ *     if (z.zmq_close(get_sckt("Thread1", portDict)) == -1):             # <<<<<<<<<<<<<<
+ *         error("Could not close comp.pyx PAIR socket")
+ *     if (z.zmq_ctx_destroy(context) == -1):
+ */
+  __pyx_t_7 = ((zmq_close(__pyx_f_4comp_get_sckt(((char const *)"Thread1"), __pyx_v_portDict)) == -1L) != 0);
+  if (__pyx_t_7) {
+
+    /* "comp.pyx":104
+ *     # Clean up socket
+ *     if (z.zmq_close(get_sckt("Thread1", portDict)) == -1):
+ *         error("Could not close comp.pyx PAIR socket")             # <<<<<<<<<<<<<<
+ *     if (z.zmq_ctx_destroy(context) == -1):
+ *         error("Could not destroy comp.pyx ZMQ context")
+ */
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_close_comp_pyx_PAIR_so, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 104, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+    /* "comp.pyx":103
+ * 
+ *     # Clean up socket
+ *     if (z.zmq_close(get_sckt("Thread1", portDict)) == -1):             # <<<<<<<<<<<<<<
+ *         error("Could not close comp.pyx PAIR socket")
+ *     if (z.zmq_ctx_destroy(context) == -1):
+ */
+  }
+
+  /* "comp.pyx":105
+ *     if (z.zmq_close(get_sckt("Thread1", portDict)) == -1):
+ *         error("Could not close comp.pyx PAIR socket")
+ *     if (z.zmq_ctx_destroy(context) == -1):             # <<<<<<<<<<<<<<
+ *         error("Could not destroy comp.pyx ZMQ context")
  * 
  */
-  (void)(zmq_close(__pyx_f_4comp_get_sckt(((char const *)"Thread1"), __pyx_v_portDict)));
+  __pyx_t_7 = ((zmq_ctx_destroy(__pyx_v_context) == -1L) != 0);
+  if (__pyx_t_7) {
 
-  /* "comp.pyx":104
- *     # Clean up socket
- *     z.zmq_close(get_sckt("Thread1", portDict))
- *     z.zmq_ctx_destroy(context)             # <<<<<<<<<<<<<<
+    /* "comp.pyx":106
+ *         error("Could not close comp.pyx PAIR socket")
+ *     if (z.zmq_ctx_destroy(context) == -1):
+ *         error("Could not destroy comp.pyx ZMQ context")             # <<<<<<<<<<<<<<
  * 
  *     # Join thread
  */
-  (void)(zmq_ctx_destroy(__pyx_v_context));
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_destroy_comp_pyx_ZMQ_c, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "comp.pyx":107
+    /* "comp.pyx":105
+ *     if (z.zmq_close(get_sckt("Thread1", portDict)) == -1):
+ *         error("Could not close comp.pyx PAIR socket")
+ *     if (z.zmq_ctx_destroy(context) == -1):             # <<<<<<<<<<<<<<
+ *         error("Could not destroy comp.pyx ZMQ context")
+ * 
+ */
+  }
+
+  /* "comp.pyx":109
  * 
  *     # Join thread
  *     print("Main: Joining thread")             # <<<<<<<<<<<<<<
  *     if (pthread_join(t1, NULL) == -1):
- *         error("Can't join thread 1")
+ *         error("Could not join thread1 in comp.pyx")
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Main_Joining_thread) < 0) __PYX_ERR(0, 107, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Main_Joining_thread) < 0) __PYX_ERR(0, 109, __pyx_L1_error)
 
-  /* "comp.pyx":108
+  /* "comp.pyx":110
  *     # Join thread
  *     print("Main: Joining thread")
  *     if (pthread_join(t1, NULL) == -1):             # <<<<<<<<<<<<<<
- *         error("Can't join thread 1")
+ *         error("Could not join thread1 in comp.pyx")
  * 
  */
   __pyx_t_7 = ((pthread_join(__pyx_v_t1, NULL) == -1L) != 0);
   if (__pyx_t_7) {
 
-    /* "comp.pyx":109
+    /* "comp.pyx":111
  *     print("Main: Joining thread")
  *     if (pthread_join(t1, NULL) == -1):
- *         error("Can't join thread 1")             # <<<<<<<<<<<<<<
+ *         error("Could not join thread1 in comp.pyx")             # <<<<<<<<<<<<<<
  * 
  *     # Return tuple to Python
  */
-    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Can_t_join_thread_1, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 109, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_join_thread1_in_comp_p, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 111, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "comp.pyx":108
+    /* "comp.pyx":110
  *     # Join thread
  *     print("Main: Joining thread")
  *     if (pthread_join(t1, NULL) == -1):             # <<<<<<<<<<<<<<
- *         error("Can't join thread 1")
+ *         error("Could not join thread1 in comp.pyx")
  * 
  */
   }
 
-  /* "comp.pyx":112
+  /* "comp.pyx":114
  * 
  *     # Return tuple to Python
  *     print("Sending C array to Python as tuple")             # <<<<<<<<<<<<<<
  *     return tup2
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Sending_C_array_to_Python_as_tup) < 0) __PYX_ERR(0, 112, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Sending_C_array_to_Python_as_tup) < 0) __PYX_ERR(0, 114, __pyx_L1_error)
 
-  /* "comp.pyx":113
+  /* "comp.pyx":115
  *     # Return tuple to Python
  *     print("Sending C array to Python as tuple")
  *     return tup2             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  if (!(likely(PyTuple_CheckExact(__pyx_v_tup2))||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "tuple", Py_TYPE(__pyx_v_tup2)->tp_name), 0))) __PYX_ERR(0, 113, __pyx_L1_error)
+  if (!(likely(PyTuple_CheckExact(__pyx_v_tup2))||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "tuple", Py_TYPE(__pyx_v_tup2)->tp_name), 0))) __PYX_ERR(0, 115, __pyx_L1_error)
   __Pyx_INCREF(__pyx_v_tup2);
   __pyx_r = ((PyObject*)__pyx_v_tup2);
   goto __pyx_L0;
@@ -2697,18 +2745,21 @@ static struct PyModuleDef __pyx_moduledef = {
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_, __pyx_k_, sizeof(__pyx_k_), 0, 0, 1, 0},
-  {&__pyx_kp_s_Can_t_create_thread, __pyx_k_Can_t_create_thread, sizeof(__pyx_k_Can_t_create_thread), 0, 0, 1, 0},
-  {&__pyx_kp_s_Can_t_join_thread_1, __pyx_k_Can_t_join_thread_1, sizeof(__pyx_k_Can_t_join_thread_1), 0, 0, 1, 0},
   {&__pyx_kp_s_Comp_pyx, __pyx_k_Comp_pyx, sizeof(__pyx_k_Comp_pyx), 0, 0, 1, 0},
-  {&__pyx_kp_s_Could_not_bind_main_receiver_soc, __pyx_k_Could_not_bind_main_receiver_soc, sizeof(__pyx_k_Could_not_bind_main_receiver_soc), 0, 0, 1, 0},
-  {&__pyx_kp_s_Could_not_open_shared_library, __pyx_k_Could_not_open_shared_library, sizeof(__pyx_k_Could_not_open_shared_library), 0, 0, 1, 0},
-  {&__pyx_kp_s_Could_not_receive_on_main_receiv, __pyx_k_Could_not_receive_on_main_receiv, sizeof(__pyx_k_Could_not_receive_on_main_receiv), 0, 0, 1, 0},
+  {&__pyx_kp_s_Comp_pyx_PAIR_send_message_buffe, __pyx_k_Comp_pyx_PAIR_send_message_buffe, sizeof(__pyx_k_Comp_pyx_PAIR_send_message_buffe), 0, 0, 1, 0},
+  {&__pyx_kp_s_Comp_pyx_PAIR_send_message_buffe_2, __pyx_k_Comp_pyx_PAIR_send_message_buffe_2, sizeof(__pyx_k_Comp_pyx_PAIR_send_message_buffe_2), 0, 0, 1, 0},
+  {&__pyx_kp_s_Could_not_bind_comp_pyx_PAIR_soc, __pyx_k_Could_not_bind_comp_pyx_PAIR_soc, sizeof(__pyx_k_Could_not_bind_comp_pyx_PAIR_soc), 0, 0, 1, 0},
+  {&__pyx_kp_s_Could_not_close_comp_pyx_PAIR_so, __pyx_k_Could_not_close_comp_pyx_PAIR_so, sizeof(__pyx_k_Could_not_close_comp_pyx_PAIR_so), 0, 0, 1, 0},
+  {&__pyx_kp_s_Could_not_create_thread_in_comp, __pyx_k_Could_not_create_thread_in_comp, sizeof(__pyx_k_Could_not_create_thread_in_comp), 0, 0, 1, 0},
+  {&__pyx_kp_s_Could_not_destroy_comp_pyx_ZMQ_c, __pyx_k_Could_not_destroy_comp_pyx_ZMQ_c, sizeof(__pyx_k_Could_not_destroy_comp_pyx_ZMQ_c), 0, 0, 1, 0},
+  {&__pyx_kp_s_Could_not_join_thread1_in_comp_p, __pyx_k_Could_not_join_thread1_in_comp_p, sizeof(__pyx_k_Could_not_join_thread1_in_comp_p), 0, 0, 1, 0},
+  {&__pyx_kp_s_Could_not_open_shared_library_in, __pyx_k_Could_not_open_shared_library_in, sizeof(__pyx_k_Could_not_open_shared_library_in), 0, 0, 1, 0},
+  {&__pyx_kp_s_Could_not_receive_on_comp_pyx_PA, __pyx_k_Could_not_receive_on_comp_pyx_PA, sizeof(__pyx_k_Could_not_receive_on_comp_pyx_PA), 0, 0, 1, 0},
   {&__pyx_kp_s_Main_Joining_thread, __pyx_k_Main_Joining_thread, sizeof(__pyx_k_Main_Joining_thread), 0, 0, 1, 0},
   {&__pyx_kp_s_Main_Received_tuple, __pyx_k_Main_Received_tuple, sizeof(__pyx_k_Main_Received_tuple), 0, 0, 1, 0},
   {&__pyx_kp_s_Main_Sent_array, __pyx_k_Main_Sent_array, sizeof(__pyx_k_Main_Sent_array), 0, 0, 1, 0},
   {&__pyx_kp_s_Main_Sent_array_size, __pyx_k_Main_Sent_array_size, sizeof(__pyx_k_Main_Sent_array_size), 0, 0, 1, 0},
   {&__pyx_kp_s_Main_received, __pyx_k_Main_received, sizeof(__pyx_k_Main_received), 0, 0, 1, 0},
-  {&__pyx_kp_s_Pair_send_buffer_length_incorrec, __pyx_k_Pair_send_buffer_length_incorrec, sizeof(__pyx_k_Pair_send_buffer_length_incorrec), 0, 0, 1, 0},
   {&__pyx_kp_s_Sending_C_array_to_Python_as_tup, __pyx_k_Sending_C_array_to_Python_as_tup, sizeof(__pyx_k_Sending_C_array_to_Python_as_tup), 0, 0, 1, 0},
   {&__pyx_n_s_append, __pyx_k_append, sizeof(__pyx_k_append), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
