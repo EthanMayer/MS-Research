@@ -33,11 +33,3 @@ cdef extern from "<pthread.h>" nogil:
     int pthread_mutex_init(pthread_mutex_t *mutex, pthread_mutexattr_t *mutexattr)
     int pthread_mutex_lock(pthread_mutex_t *mutex)
     int pthread_mutex_unlock(pthread_mutex_t *mutex)
-
-cdef extern from * nogil:
-    ctypedef struct sem_t:
-        pass
-
-    int sem_init(sem_t *sem, int pshared, unsigned int value)
-    int sem_post(sem_t *sem)
-    int sem_wait(sem_t *sem)
