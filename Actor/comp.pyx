@@ -31,6 +31,8 @@ cdef void* get_sckt(const char* name, portDict):
     # First check to ensure capsule is valid
     if (PyCapsule_IsValid(portDict[name], name)):
         return PyCapsule_GetPointer(portDict[name], name)
+    else:
+        error("Could not retrieve socket pointer from dictionary in comp.pyx")
 
 # Main Cython function to call C
 cpdef tuple main(tup):
