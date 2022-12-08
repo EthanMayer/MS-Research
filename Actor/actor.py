@@ -21,17 +21,29 @@ tup = tuple(tup)
 print("Tuple: " + str(tup))
 
 # Create pair socket to communicate with comp.pyx
-# context = zmq.Context()
-# socket = context.socket(zmq.PAIR)
-# socket.bind("tcp://127.0.0.1:5555")
+context = zmq.Context()
+socket = context.socket(zmq.PAIR)
+socket.bind("tcp://127.0.0.1:5555")
 
-# Hand tuple to cython main function
+# Hand tuple to cython main function via a python thread
 tup2 = []
 comp = threading.Thread(target = main, args = (tup, tup2), daemon = True)
 comp.start()
 
+# Wait for ready from Cython
+msg = socket.recv()
+print("Python: received " + str(msg))
+
+# Send function to be loaded
+func = input("Enter function to be loaded: ")
+socket.send_string(func)
+
+# Wait for Cython to finish for result
 comp.join()
-#tup2 = main(tup)
+
+# Clean up ZMQ
+socket.close()
+context.destroy()
 
 # Print the tuple returned by cython
 print("======== Actor.py ========")
