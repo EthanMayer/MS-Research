@@ -1348,6 +1348,18 @@ static PyObject* __Pyx_PyObject_CallMethod1(PyObject* obj, PyObject* method_name
 /* append.proto */
 static CYTHON_INLINE int __Pyx_PyObject_Append(PyObject* L, PyObject* x);
 
+/* RaiseArgTupleInvalid.proto */
+static void __Pyx_RaiseArgtupleInvalid(const char* func_name, int exact,
+    Py_ssize_t num_min, Py_ssize_t num_max, Py_ssize_t num_found);
+
+/* RaiseDoubleKeywords.proto */
+static void __Pyx_RaiseDoubleKeywordsError(const char* func_name, PyObject* kw_name);
+
+/* ParseKeywords.proto */
+static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject **argnames[],\
+    PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args,\
+    const char* function_name);
+
 /* TypeImport.proto */
 #ifndef __PYX_HAVE_RT_ImportType_proto
 #define __PYX_HAVE_RT_ImportType_proto
@@ -1574,7 +1586,7 @@ static PyTypeObject *__pyx_ptype_3zmq_7backend_6cython_6socket_Socket = 0;
 static PyObject *__pyx_f_4comp_error(PyObject *, int __pyx_skip_dispatch); /*proto*/
 static void __pyx_f_4comp_store_sckt(char const *, void *, PyObject *); /*proto*/
 static void *__pyx_f_4comp_get_sckt(char const *, PyObject *); /*proto*/
-static PyObject *__pyx_f_4comp_main(PyObject *, int __pyx_skip_dispatch); /*proto*/
+static PyObject *__pyx_f_4comp_main(PyObject *, PyObject *, int __pyx_skip_dispatch); /*proto*/
 #define __Pyx_MODULE_NAME "comp"
 extern int __pyx_module_is_main_comp;
 int __pyx_module_is_main_comp = 0;
@@ -1584,11 +1596,13 @@ static PyObject *__pyx_builtin_exit;
 static PyObject *__pyx_builtin_range;
 static const char __pyx_k_[] = ": ";
 static const char __pyx_k_end[] = "end";
+static const char __pyx_k_tup[] = "tup";
 static const char __pyx_k_exit[] = "exit";
 static const char __pyx_k_file[] = "file";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_test[] = "__test__";
+static const char __pyx_k_tup2[] = "tup2";
 static const char __pyx_k_print[] = "print";
 static const char __pyx_k_range[] = "range";
 static const char __pyx_k_append[] = "append";
@@ -1640,8 +1654,10 @@ static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_n_s_pyx_vtable;
 static PyObject *__pyx_n_s_range;
 static PyObject *__pyx_n_s_test;
+static PyObject *__pyx_n_s_tup;
+static PyObject *__pyx_n_s_tup2;
 static PyObject *__pyx_pf_4comp_error(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_msg); /* proto */
-static PyObject *__pyx_pf_4comp_2main(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_tup); /* proto */
+static PyObject *__pyx_pf_4comp_2main(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_tup, PyObject *__pyx_v_tup2); /* proto */
 static PyObject *__pyx_int_1;
 static PyObject *__pyx_tuple__2;
 /* Late includes */
@@ -1950,13 +1966,13 @@ static void *__pyx_f_4comp_get_sckt(char const *__pyx_v_name, PyObject *__pyx_v_
 /* "comp.pyx":38
  * 
  * # Main Cython function to call C
- * cpdef tuple main(tup):             # <<<<<<<<<<<<<<
+ * cpdef tuple main(tup, tup2):             # <<<<<<<<<<<<<<
  *     print("======== Comp.pyx ========")
  *     cdef int* arr2 = <int*> malloc(n * sizeof(int)) # Array for return values
  */
 
-static PyObject *__pyx_pw_4comp_3main(PyObject *__pyx_self, PyObject *__pyx_v_tup); /*proto*/
-static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __pyx_skip_dispatch) {
+static PyObject *__pyx_pw_4comp_3main(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup2, CYTHON_UNUSED int __pyx_skip_dispatch) {
   int *__pyx_v_arr2;
   pthread_t __pyx_v_t1;
   PyObject *__pyx_v_portDict = NULL;
@@ -1970,7 +1986,6 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
   void *__pyx_v_thread1;
   char __pyx_v_buf[6];
   char __pyx_v_sizeBuf[0x100];
-  PyObject *__pyx_v_tup2 = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -1986,10 +2001,11 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("main", 0);
+  __Pyx_INCREF(__pyx_v_tup2);
 
   /* "comp.pyx":39
  * # Main Cython function to call C
- * cpdef tuple main(tup):
+ * cpdef tuple main(tup, tup2):
  *     print("======== Comp.pyx ========")             # <<<<<<<<<<<<<<
  *     cdef int* arr2 = <int*> malloc(n * sizeof(int)) # Array for return values
  *     cdef pthread_t t1    # Thread 1's ID
@@ -1997,7 +2013,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
   if (__Pyx_PrintOne(0, __pyx_kp_s_Comp_pyx) < 0) __PYX_ERR(0, 39, __pyx_L1_error)
 
   /* "comp.pyx":40
- * cpdef tuple main(tup):
+ * cpdef tuple main(tup, tup2):
  *     print("======== Comp.pyx ========")
  *     cdef int* arr2 = <int*> malloc(n * sizeof(int)) # Array for return values             # <<<<<<<<<<<<<<
  *     cdef pthread_t t1    # Thread 1's ID
@@ -2380,21 +2396,9 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
  */
   }
 
-  /* "comp.pyx":97
- * 
- *     # Convert received array to Python tuple
- *     tup2 = []             # <<<<<<<<<<<<<<
- *     for i in range(n):
- *         tup2.append(int(arr2[i]))
- */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 97, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_v_tup2 = __pyx_t_1;
-  __pyx_t_1 = 0;
-
   /* "comp.pyx":98
  *     # Convert received array to Python tuple
- *     tup2 = []
+ *     # tup2 = []
  *     for i in range(n):             # <<<<<<<<<<<<<<
  *         tup2.append(int(arr2[i]))
  *     tup2 = tuple(tup2)
@@ -2405,7 +2409,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
     __pyx_v_i = __pyx_t_5;
 
     /* "comp.pyx":99
- *     tup2 = []
+ *     # tup2 = []
  *     for i in range(n):
  *         tup2.append(int(arr2[i]))             # <<<<<<<<<<<<<<
  *     tup2 = tuple(tup2)
@@ -2577,7 +2581,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
   /* "comp.pyx":38
  * 
  * # Main Cython function to call C
- * cpdef tuple main(tup):             # <<<<<<<<<<<<<<
+ * cpdef tuple main(tup, tup2):             # <<<<<<<<<<<<<<
  *     print("======== Comp.pyx ========")
  *     cdef int* arr2 = <int*> malloc(n * sizeof(int)) # Array for return values
  */
@@ -2597,19 +2601,70 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, CYTHON_UNUSED int __p
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4comp_3main(PyObject *__pyx_self, PyObject *__pyx_v_tup); /*proto*/
-static PyObject *__pyx_pw_4comp_3main(PyObject *__pyx_self, PyObject *__pyx_v_tup) {
+static PyObject *__pyx_pw_4comp_3main(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_4comp_3main(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_tup = 0;
+  PyObject *__pyx_v_tup2 = 0;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("main (wrapper)", 0);
-  __pyx_r = __pyx_pf_4comp_2main(__pyx_self, ((PyObject *)__pyx_v_tup));
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_tup,&__pyx_n_s_tup2,0};
+    PyObject* values[2] = {0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_tup)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_tup2)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("main", 1, 2, 2, 1); __PYX_ERR(0, 38, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "main") < 0)) __PYX_ERR(0, 38, __pyx_L3_error)
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+    }
+    __pyx_v_tup = values[0];
+    __pyx_v_tup2 = values[1];
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("main", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 38, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("comp.main", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_4comp_2main(__pyx_self, __pyx_v_tup, __pyx_v_tup2);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4comp_2main(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_tup) {
+static PyObject *__pyx_pf_4comp_2main(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_tup, PyObject *__pyx_v_tup2) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -2618,7 +2673,7 @@ static PyObject *__pyx_pf_4comp_2main(CYTHON_UNUSED PyObject *__pyx_self, PyObje
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("main", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_4comp_main(__pyx_v_tup, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_4comp_main(__pyx_v_tup, __pyx_v_tup2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -2713,7 +2768,7 @@ static CYTHON_INLINE PyObject *__pyx_f_3zmq_7backend_6cython_7message_copy_zmq_m
 
 static PyMethodDef __pyx_methods[] = {
   {"error", (PyCFunction)__pyx_pw_4comp_1error, METH_O, 0},
-  {"main", (PyCFunction)__pyx_pw_4comp_3main, METH_O, 0},
+  {"main", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_4comp_3main, METH_VARARGS|METH_KEYWORDS, 0},
   {0, 0, 0, 0}
 };
 
@@ -2788,6 +2843,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
+  {&__pyx_n_s_tup, __pyx_k_tup, sizeof(__pyx_k_tup), 0, 0, 1, 1},
+  {&__pyx_n_s_tup2, __pyx_k_tup2, sizeof(__pyx_k_tup2), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
@@ -3786,6 +3843,148 @@ static CYTHON_INLINE int __Pyx_PyObject_Append(PyObject* L, PyObject* x) {
         Py_DECREF(retval);
     }
     return 0;
+}
+
+/* RaiseArgTupleInvalid */
+static void __Pyx_RaiseArgtupleInvalid(
+    const char* func_name,
+    int exact,
+    Py_ssize_t num_min,
+    Py_ssize_t num_max,
+    Py_ssize_t num_found)
+{
+    Py_ssize_t num_expected;
+    const char *more_or_less;
+    if (num_found < num_min) {
+        num_expected = num_min;
+        more_or_less = "at least";
+    } else {
+        num_expected = num_max;
+        more_or_less = "at most";
+    }
+    if (exact) {
+        more_or_less = "exactly";
+    }
+    PyErr_Format(PyExc_TypeError,
+                 "%.200s() takes %.8s %" CYTHON_FORMAT_SSIZE_T "d positional argument%.1s (%" CYTHON_FORMAT_SSIZE_T "d given)",
+                 func_name, more_or_less, num_expected,
+                 (num_expected == 1) ? "" : "s", num_found);
+}
+
+/* RaiseDoubleKeywords */
+static void __Pyx_RaiseDoubleKeywordsError(
+    const char* func_name,
+    PyObject* kw_name)
+{
+    PyErr_Format(PyExc_TypeError,
+        #if PY_MAJOR_VERSION >= 3
+        "%s() got multiple values for keyword argument '%U'", func_name, kw_name);
+        #else
+        "%s() got multiple values for keyword argument '%s'", func_name,
+        PyString_AsString(kw_name));
+        #endif
+}
+
+/* ParseKeywords */
+static int __Pyx_ParseOptionalKeywords(
+    PyObject *kwds,
+    PyObject **argnames[],
+    PyObject *kwds2,
+    PyObject *values[],
+    Py_ssize_t num_pos_args,
+    const char* function_name)
+{
+    PyObject *key = 0, *value = 0;
+    Py_ssize_t pos = 0;
+    PyObject*** name;
+    PyObject*** first_kw_arg = argnames + num_pos_args;
+    while (PyDict_Next(kwds, &pos, &key, &value)) {
+        name = first_kw_arg;
+        while (*name && (**name != key)) name++;
+        if (*name) {
+            values[name-argnames] = value;
+            continue;
+        }
+        name = first_kw_arg;
+        #if PY_MAJOR_VERSION < 3
+        if (likely(PyString_Check(key))) {
+            while (*name) {
+                if ((CYTHON_COMPILING_IN_PYPY || PyString_GET_SIZE(**name) == PyString_GET_SIZE(key))
+                        && _PyString_Eq(**name, key)) {
+                    values[name-argnames] = value;
+                    break;
+                }
+                name++;
+            }
+            if (*name) continue;
+            else {
+                PyObject*** argname = argnames;
+                while (argname != first_kw_arg) {
+                    if ((**argname == key) || (
+                            (CYTHON_COMPILING_IN_PYPY || PyString_GET_SIZE(**argname) == PyString_GET_SIZE(key))
+                             && _PyString_Eq(**argname, key))) {
+                        goto arg_passed_twice;
+                    }
+                    argname++;
+                }
+            }
+        } else
+        #endif
+        if (likely(PyUnicode_Check(key))) {
+            while (*name) {
+                int cmp = (**name == key) ? 0 :
+                #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION >= 3
+                    (__Pyx_PyUnicode_GET_LENGTH(**name) != __Pyx_PyUnicode_GET_LENGTH(key)) ? 1 :
+                #endif
+                    PyUnicode_Compare(**name, key);
+                if (cmp < 0 && unlikely(PyErr_Occurred())) goto bad;
+                if (cmp == 0) {
+                    values[name-argnames] = value;
+                    break;
+                }
+                name++;
+            }
+            if (*name) continue;
+            else {
+                PyObject*** argname = argnames;
+                while (argname != first_kw_arg) {
+                    int cmp = (**argname == key) ? 0 :
+                    #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION >= 3
+                        (__Pyx_PyUnicode_GET_LENGTH(**argname) != __Pyx_PyUnicode_GET_LENGTH(key)) ? 1 :
+                    #endif
+                        PyUnicode_Compare(**argname, key);
+                    if (cmp < 0 && unlikely(PyErr_Occurred())) goto bad;
+                    if (cmp == 0) goto arg_passed_twice;
+                    argname++;
+                }
+            }
+        } else
+            goto invalid_keyword_type;
+        if (kwds2) {
+            if (unlikely(PyDict_SetItem(kwds2, key, value))) goto bad;
+        } else {
+            goto invalid_keyword;
+        }
+    }
+    return 0;
+arg_passed_twice:
+    __Pyx_RaiseDoubleKeywordsError(function_name, key);
+    goto bad;
+invalid_keyword_type:
+    PyErr_Format(PyExc_TypeError,
+        "%.200s() keywords must be strings", function_name);
+    goto bad;
+invalid_keyword:
+    PyErr_Format(PyExc_TypeError,
+    #if PY_MAJOR_VERSION < 3
+        "%.200s() got an unexpected keyword argument '%.200s'",
+        function_name, PyString_AsString(key));
+    #else
+        "%s() got an unexpected keyword argument '%U'",
+        function_name, key);
+    #endif
+bad:
+    return -1;
 }
 
 /* TypeImport */

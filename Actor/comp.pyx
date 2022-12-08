@@ -35,7 +35,7 @@ cdef void* get_sckt(const char* name, portDict):
         error("Could not retrieve socket pointer from dictionary in comp.pyx")
 
 # Main Cython function to call C
-cpdef tuple main(tup):
+cpdef tuple main(tup, tup2):
     print("======== Comp.pyx ========")
     cdef int* arr2 = <int*> malloc(n * sizeof(int)) # Array for return values
     cdef pthread_t t1    # Thread 1's ID
@@ -94,7 +94,7 @@ cpdef tuple main(tup):
         error("Could not receive on comp.pyx PAIR socket")
     
     # Convert received array to Python tuple
-    tup2 = []
+    # tup2 = []
     for i in range(n):
         tup2.append(int(arr2[i]))
     tup2 = tuple(tup2)

@@ -6,6 +6,8 @@
 import sys
 # Import everything from my cython module comp
 from comp import *
+import zmq
+import threading
 
 print("======== Actor.py ========")
 
@@ -18,9 +20,19 @@ tup = tuple(tup)
 
 print("Tuple: " + str(tup))
 
+# Create pair socket to communicate with comp.pyx
+# context = zmq.Context()
+# socket = context.socket(zmq.PAIR)
+# socket.bind("tcp://127.0.0.1:5555")
+
 # Hand tuple to cython main function
-tup2 = main(tup)
+tup2 = []
+comp = threading.Thread(target = main, args = (tup, tup2), daemon = True)
+comp.start()
+
+comp.join()
+#tup2 = main(tup)
 
 # Print the tuple returned by cython
 print("======== Actor.py ========")
-print("Returned tuple: " + str(tup2))
+print("Returned tuple: " + str(tuple(tup2)))
