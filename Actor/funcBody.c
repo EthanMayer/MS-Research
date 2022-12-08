@@ -54,7 +54,7 @@ void* send_back() {
         error("Could not receive on thread1 receive socket\n");
     }
     printf("Thread %ld: Received array: ", thread);
-    for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+    for (int i = 0; i < arrSize; i++) {
         printf("%d ", arr[i]);
     }
     printf("\n");
@@ -62,7 +62,7 @@ void* send_back() {
 
     // Send return array size to main thread
     char sizeBuf2[256];
-    sprintf(sizeBuf, "%d", arrSize);
+    sprintf(sizeBuf2, "%d", arrSize);
     printf("Thread %ld: Sending array size %d\n", thread, arrSize);
     fflush(stdout);
     if (zmq_send(sckt, sizeBuf2, sizeof(sizeBuf2), 0) != sizeof(sizeBuf2)) {
@@ -86,7 +86,7 @@ void* send_back() {
     return NULL;
 }
 
-// Function to be run on a thread to send back data
+// Function to be run on a thread to add data
 void* add() {
     // Debug identify self
     long thread = pthread_self();
@@ -127,18 +127,18 @@ void* add() {
 
     // Calculate total from received array
     int total = 0;
-    arrSize = 1;
-    for (int i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) {
+    for (int i = 0; i < arrSize; i++) {
         printf("%d ", arr[i]);
         total += arr[i];
     }
     printf("\n");
     fflush(stdout);
+    arrSize = 1;
     int arr2[] = {total};
 
     // Send return array size to main thread
     char sizeBuf2[256];
-    sprintf(sizeBuf, "%d", arrSize);
+    sprintf(sizeBuf2, "%d", arrSize);
     printf("Thread %ld: Sending array size %d\n", thread, arrSize);
     fflush(stdout);
     if (zmq_send(sckt, sizeBuf2, sizeof(sizeBuf2), 0) != sizeof(sizeBuf2)) {

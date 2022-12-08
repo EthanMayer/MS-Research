@@ -3,7 +3,7 @@
 #   Author - Ethan Mayer
 #   Fall 2022  
 
-# Import functions from the c standard library
+# Import c libraries
 from libc.stdlib cimport malloc, free, atoi
 from posix.dlfcn cimport dlopen, dlsym, RTLD_LAZY
 from libc.string cimport strerror
@@ -12,6 +12,8 @@ from libc.stdio cimport sprintf
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer, PyCapsule_GetName
 from pthread cimport pthread_create, pthread_join, pthread_t
 from zmq.backend.cython cimport libzmq as z
+
+# Import python libraries
 import zmq
     
 # Error handling
@@ -106,7 +108,7 @@ cpdef tuple main(tup, tup2):
     cdef char sizeBuf2[256]
     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), sizeBuf2, sizeof(sizeBuf2), 0) == -1):
         error("Could not receive on comp.pyx PAIR socket")
-    cdef int arrSize = atoi(sizeBuf);
+    cdef int arrSize = atoi(sizeBuf2);
     cdef int* arr2 = <int*> malloc(arrSize * sizeof(int)) # Array for return values
     print("Cython: Received array size " + str(arrSize))
 

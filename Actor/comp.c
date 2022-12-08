@@ -1376,6 +1376,30 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObjec
 /* PyObjectCall2Args.proto */
 static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2);
 
+/* GetTopmostException.proto */
+#if CYTHON_USE_EXC_INFO_STACK
+static _PyErr_StackItem * __Pyx_PyErr_GetTopmostException(PyThreadState *tstate);
+#endif
+
+/* SaveResetException.proto */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_ExceptionSave(type, value, tb)  __Pyx__ExceptionSave(__pyx_tstate, type, value, tb)
+static CYTHON_INLINE void __Pyx__ExceptionSave(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
+#define __Pyx_ExceptionReset(type, value, tb)  __Pyx__ExceptionReset(__pyx_tstate, type, value, tb)
+static CYTHON_INLINE void __Pyx__ExceptionReset(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb);
+#else
+#define __Pyx_ExceptionSave(type, value, tb)   PyErr_GetExcInfo(type, value, tb)
+#define __Pyx_ExceptionReset(type, value, tb)  PyErr_SetExcInfo(type, value, tb)
+#endif
+
+/* GetException.proto */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_GetException(type, value, tb)  __Pyx__GetException(__pyx_tstate, type, value, tb)
+static int __Pyx__GetException(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
+#else
+static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb);
+#endif
+
 /* ListAppend.proto */
 #if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
 static CYTHON_INLINE int __Pyx_PyList_Append(PyObject* list, PyObject* x) {
@@ -1637,6 +1661,7 @@ static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_recv[] = "recv";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_tup2[] = "tup2";
+static const char __pyx_k_Error[] = "Error!";
 static const char __pyx_k_Ready[] = "Ready";
 static const char __pyx_k_close[] = "close";
 static const char __pyx_k_print[] = "print";
@@ -1692,6 +1717,7 @@ static PyObject *__pyx_kp_s_Cython_Sending_Ready_signal;
 static PyObject *__pyx_kp_s_Cython_Sent_array;
 static PyObject *__pyx_kp_s_Cython_Sent_array_size;
 static PyObject *__pyx_kp_s_Cython_received;
+static PyObject *__pyx_kp_s_Error;
 static PyObject *__pyx_n_s_PAIR;
 static PyObject *__pyx_n_s_Ready;
 static PyObject *__pyx_kp_s_Sending_C_array_to_Python_as_tup;
@@ -2064,8 +2090,11 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
   PyObject *__pyx_t_8 = NULL;
   PyObject *__pyx_t_9 = NULL;
   int __pyx_t_10;
-  char const *__pyx_t_11;
-  int __pyx_t_12;
+  PyObject *__pyx_t_11 = NULL;
+  PyObject *__pyx_t_12 = NULL;
+  PyObject *__pyx_t_13 = NULL;
+  char const *__pyx_t_14;
+  int __pyx_t_15;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -2418,18 +2447,101 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
  */
   }
 
-  /* "comp.pyx":82
- * 
+  /* "comp.pyx":83
  *     # Create thread with the .so function as body
- *     cdef void *thread1 = dlsym(libhandle, func)             # <<<<<<<<<<<<<<
+ *     cdef void* thread1
+ *     try:             # <<<<<<<<<<<<<<
+ *          thread1 = dlsym(libhandle, func)
+ *     except:
+ */
+  {
+    __Pyx_PyThreadState_declare
+    __Pyx_PyThreadState_assign
+    __Pyx_ExceptionSave(&__pyx_t_11, &__pyx_t_12, &__pyx_t_13);
+    __Pyx_XGOTREF(__pyx_t_11);
+    __Pyx_XGOTREF(__pyx_t_12);
+    __Pyx_XGOTREF(__pyx_t_13);
+    /*try:*/ {
+
+      /* "comp.pyx":84
+ *     cdef void* thread1
+ *     try:
+ *          thread1 = dlsym(libhandle, func)             # <<<<<<<<<<<<<<
+ *     except:
+ *         print("Error!")
+ */
+      __pyx_t_14 = __Pyx_PyObject_AsString(__pyx_v_func); if (unlikely((!__pyx_t_14) && PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L7_error)
+      __pyx_v_thread1 = dlsym(__pyx_v_libhandle, __pyx_t_14);
+
+      /* "comp.pyx":83
+ *     # Create thread with the .so function as body
+ *     cdef void* thread1
+ *     try:             # <<<<<<<<<<<<<<
+ *          thread1 = dlsym(libhandle, func)
+ *     except:
+ */
+    }
+    __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
+    __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
+    __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
+    goto __pyx_L12_try_end;
+    __pyx_L7_error:;
+    __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+
+    /* "comp.pyx":85
+ *     try:
+ *          thread1 = dlsym(libhandle, func)
+ *     except:             # <<<<<<<<<<<<<<
+ *         print("Error!")
+ * 
+ */
+    /*except:*/ {
+      __Pyx_AddTraceback("comp.main", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_1, &__pyx_t_9) < 0) __PYX_ERR(0, 85, __pyx_L9_except_error)
+      __Pyx_GOTREF(__pyx_t_8);
+      __Pyx_GOTREF(__pyx_t_1);
+      __Pyx_GOTREF(__pyx_t_9);
+
+      /* "comp.pyx":86
+ *          thread1 = dlsym(libhandle, func)
+ *     except:
+ *         print("Error!")             # <<<<<<<<<<<<<<
  * 
  *     if (pthread_create(&t1, NULL, thread1, NULL) == -1):
  */
-  __pyx_t_11 = __Pyx_PyObject_AsString(__pyx_v_func); if (unlikely((!__pyx_t_11) && PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L1_error)
-  __pyx_v_thread1 = dlsym(__pyx_v_libhandle, __pyx_t_11);
+      if (__Pyx_PrintOne(0, __pyx_kp_s_Error) < 0) __PYX_ERR(0, 86, __pyx_L9_except_error)
+      __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+      __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+      __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
+      goto __pyx_L8_exception_handled;
+    }
+    __pyx_L9_except_error:;
 
-  /* "comp.pyx":84
- *     cdef void *thread1 = dlsym(libhandle, func)
+    /* "comp.pyx":83
+ *     # Create thread with the .so function as body
+ *     cdef void* thread1
+ *     try:             # <<<<<<<<<<<<<<
+ *          thread1 = dlsym(libhandle, func)
+ *     except:
+ */
+    __Pyx_XGIVEREF(__pyx_t_11);
+    __Pyx_XGIVEREF(__pyx_t_12);
+    __Pyx_XGIVEREF(__pyx_t_13);
+    __Pyx_ExceptionReset(__pyx_t_11, __pyx_t_12, __pyx_t_13);
+    goto __pyx_L1_error;
+    __pyx_L8_exception_handled:;
+    __Pyx_XGIVEREF(__pyx_t_11);
+    __Pyx_XGIVEREF(__pyx_t_12);
+    __Pyx_XGIVEREF(__pyx_t_13);
+    __Pyx_ExceptionReset(__pyx_t_11, __pyx_t_12, __pyx_t_13);
+    __pyx_L12_try_end:;
+  }
+
+  /* "comp.pyx":88
+ *         print("Error!")
  * 
  *     if (pthread_create(&t1, NULL, thread1, NULL) == -1):             # <<<<<<<<<<<<<<
  *         error("Could not create thread in comp.pyx")
@@ -2438,19 +2550,19 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
   __pyx_t_10 = ((pthread_create((&__pyx_v_t1), NULL, __pyx_v_thread1, NULL) == -1L) != 0);
   if (__pyx_t_10) {
 
-    /* "comp.pyx":85
+    /* "comp.pyx":89
  * 
  *     if (pthread_create(&t1, NULL, thread1, NULL) == -1):
  *         error("Could not create thread in comp.pyx")             # <<<<<<<<<<<<<<
  * 
  *     # Receive "Ready" message to know the thread is ready
  */
-    __pyx_t_8 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_create_thread_in_comp, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 85, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_t_9 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_create_thread_in_comp, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 89, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
+    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "comp.pyx":84
- *     cdef void *thread1 = dlsym(libhandle, func)
+    /* "comp.pyx":88
+ *         print("Error!")
  * 
  *     if (pthread_create(&t1, NULL, thread1, NULL) == -1):             # <<<<<<<<<<<<<<
  *         error("Could not create thread in comp.pyx")
@@ -2458,7 +2570,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
  */
   }
 
-  /* "comp.pyx":89
+  /* "comp.pyx":93
  *     # Receive "Ready" message to know the thread is ready
  *     cdef char buf[6]
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), buf, sizeof(buf), 0) == -1):             # <<<<<<<<<<<<<<
@@ -2468,18 +2580,18 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
   __pyx_t_10 = ((zmq_recvbuf(__pyx_f_4comp_get_sckt(((char const *)"Thread1"), __pyx_v_portDict), __pyx_v_buf, (sizeof(__pyx_v_buf)), 0) == -1L) != 0);
   if (__pyx_t_10) {
 
-    /* "comp.pyx":90
+    /* "comp.pyx":94
  *     cdef char buf[6]
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), buf, sizeof(buf), 0) == -1):
  *         error("Could not receive on comp.pyx PAIR socket")             # <<<<<<<<<<<<<<
  *     print("Cython: received " + str(buf))
  * 
  */
-    __pyx_t_8 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_receive_on_comp_pyx_PA, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 90, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_t_9 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_receive_on_comp_pyx_PA, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 94, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
+    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "comp.pyx":89
+    /* "comp.pyx":93
  *     # Receive "Ready" message to know the thread is ready
  *     cdef char buf[6]
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), buf, sizeof(buf), 0) == -1):             # <<<<<<<<<<<<<<
@@ -2488,25 +2600,25 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
  */
   }
 
-  /* "comp.pyx":91
+  /* "comp.pyx":95
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), buf, sizeof(buf), 0) == -1):
  *         error("Could not receive on comp.pyx PAIR socket")
  *     print("Cython: received " + str(buf))             # <<<<<<<<<<<<<<
  * 
  *     # Send array size via socket to threads
  */
-  __pyx_t_8 = __Pyx_PyObject_FromString(__pyx_v_buf); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 91, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 91, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_FromString(__pyx_v_buf); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_9);
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_t_9); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 95, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  __pyx_t_8 = PyNumber_Add(__pyx_kp_s_Cython_received, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 91, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+  __pyx_t_9 = PyNumber_Add(__pyx_kp_s_Cython_received, __pyx_t_1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (__Pyx_PrintOne(0, __pyx_t_8) < 0) __PYX_ERR(0, 91, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  if (__Pyx_PrintOne(0, __pyx_t_9) < 0) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-  /* "comp.pyx":95
+  /* "comp.pyx":99
  *     # Send array size via socket to threads
  *     cdef char sizeBuf[256]
  *     sprintf(sizeBuf, "%d", n)             # <<<<<<<<<<<<<<
@@ -2515,7 +2627,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
  */
   (void)(sprintf(__pyx_v_sizeBuf, ((char const *)"%d"), __pyx_v_n));
 
-  /* "comp.pyx":96
+  /* "comp.pyx":100
  *     cdef char sizeBuf[256]
  *     sprintf(sizeBuf, "%d", n)
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):             # <<<<<<<<<<<<<<
@@ -2525,18 +2637,18 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
   __pyx_t_10 = ((zmq_sendbuf(__pyx_f_4comp_get_sckt(((char const *)"Thread1"), __pyx_v_portDict), __pyx_v_sizeBuf, (sizeof(__pyx_v_sizeBuf)), 0) != (sizeof(__pyx_v_sizeBuf))) != 0);
   if (__pyx_t_10) {
 
-    /* "comp.pyx":97
+    /* "comp.pyx":101
  *     sprintf(sizeBuf, "%d", n)
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):
  *         error("Comp.pyx PAIR send message buffer length incorrect")             # <<<<<<<<<<<<<<
  *     print("Cython: Sent array size " + str(n))
  * 
  */
-    __pyx_t_8 = __pyx_f_4comp_error(__pyx_kp_s_Comp_pyx_PAIR_send_message_buffe, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 97, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_t_9 = __pyx_f_4comp_error(__pyx_kp_s_Comp_pyx_PAIR_send_message_buffe, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 101, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
+    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "comp.pyx":96
+    /* "comp.pyx":100
  *     cdef char sizeBuf[256]
  *     sprintf(sizeBuf, "%d", n)
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):             # <<<<<<<<<<<<<<
@@ -2545,25 +2657,25 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
  */
   }
 
-  /* "comp.pyx":98
+  /* "comp.pyx":102
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):
  *         error("Comp.pyx PAIR send message buffer length incorrect")
  *     print("Cython: Sent array size " + str(n))             # <<<<<<<<<<<<<<
  * 
  *     # Send array via socket to thread
  */
-  __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_n); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 98, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 98, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_n); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_9);
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_t_9); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 102, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  __pyx_t_8 = PyNumber_Add(__pyx_kp_s_Cython_Sent_array_size, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 98, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+  __pyx_t_9 = PyNumber_Add(__pyx_kp_s_Cython_Sent_array_size, __pyx_t_1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (__Pyx_PrintOne(0, __pyx_t_8) < 0) __PYX_ERR(0, 98, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  if (__Pyx_PrintOne(0, __pyx_t_9) < 0) __PYX_ERR(0, 102, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-  /* "comp.pyx":101
+  /* "comp.pyx":105
  * 
  *     # Send array via socket to thread
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), arr, n * sizeof(int), 0) != n * sizeof(int)):             # <<<<<<<<<<<<<<
@@ -2573,18 +2685,18 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
   __pyx_t_10 = ((zmq_sendbuf(__pyx_f_4comp_get_sckt(((char const *)"Thread1"), __pyx_v_portDict), __pyx_v_arr, (__pyx_v_n * (sizeof(int))), 0) != (__pyx_v_n * (sizeof(int)))) != 0);
   if (__pyx_t_10) {
 
-    /* "comp.pyx":102
+    /* "comp.pyx":106
  *     # Send array via socket to thread
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), arr, n * sizeof(int), 0) != n * sizeof(int)):
  *         error("Comp.pyx PAIR send message buffer length incorrect\n")             # <<<<<<<<<<<<<<
  *     print("Cython: Sent array")
  * 
  */
-    __pyx_t_8 = __pyx_f_4comp_error(__pyx_kp_s_Comp_pyx_PAIR_send_message_buffe_2, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 102, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_t_9 = __pyx_f_4comp_error(__pyx_kp_s_Comp_pyx_PAIR_send_message_buffe_2, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
+    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "comp.pyx":101
+    /* "comp.pyx":105
  * 
  *     # Send array via socket to thread
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), arr, n * sizeof(int), 0) != n * sizeof(int)):             # <<<<<<<<<<<<<<
@@ -2593,82 +2705,82 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
  */
   }
 
-  /* "comp.pyx":103
+  /* "comp.pyx":107
  *     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), arr, n * sizeof(int), 0) != n * sizeof(int)):
  *         error("Comp.pyx PAIR send message buffer length incorrect\n")
  *     print("Cython: Sent array")             # <<<<<<<<<<<<<<
  * 
  *     # Receive array size via socket from thread
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Cython_Sent_array) < 0) __PYX_ERR(0, 103, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Cython_Sent_array) < 0) __PYX_ERR(0, 107, __pyx_L1_error)
 
-  /* "comp.pyx":107
+  /* "comp.pyx":111
  *     # Receive array size via socket from thread
  *     cdef char sizeBuf2[256]
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), sizeBuf2, sizeof(sizeBuf2), 0) == -1):             # <<<<<<<<<<<<<<
  *         error("Could not receive on comp.pyx PAIR socket")
- *     cdef int arrSize = atoi(sizeBuf);
+ *     cdef int arrSize = atoi(sizeBuf2);
  */
   __pyx_t_10 = ((zmq_recvbuf(__pyx_f_4comp_get_sckt(((char const *)"Thread1"), __pyx_v_portDict), __pyx_v_sizeBuf2, (sizeof(__pyx_v_sizeBuf2)), 0) == -1L) != 0);
   if (__pyx_t_10) {
 
-    /* "comp.pyx":108
+    /* "comp.pyx":112
  *     cdef char sizeBuf2[256]
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), sizeBuf2, sizeof(sizeBuf2), 0) == -1):
  *         error("Could not receive on comp.pyx PAIR socket")             # <<<<<<<<<<<<<<
- *     cdef int arrSize = atoi(sizeBuf);
+ *     cdef int arrSize = atoi(sizeBuf2);
  *     cdef int* arr2 = <int*> malloc(arrSize * sizeof(int)) # Array for return values
  */
-    __pyx_t_8 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_receive_on_comp_pyx_PA, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 108, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_t_9 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_receive_on_comp_pyx_PA, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 112, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
+    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "comp.pyx":107
+    /* "comp.pyx":111
  *     # Receive array size via socket from thread
  *     cdef char sizeBuf2[256]
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), sizeBuf2, sizeof(sizeBuf2), 0) == -1):             # <<<<<<<<<<<<<<
  *         error("Could not receive on comp.pyx PAIR socket")
- *     cdef int arrSize = atoi(sizeBuf);
+ *     cdef int arrSize = atoi(sizeBuf2);
  */
   }
 
-  /* "comp.pyx":109
+  /* "comp.pyx":113
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), sizeBuf2, sizeof(sizeBuf2), 0) == -1):
  *         error("Could not receive on comp.pyx PAIR socket")
- *     cdef int arrSize = atoi(sizeBuf);             # <<<<<<<<<<<<<<
+ *     cdef int arrSize = atoi(sizeBuf2);             # <<<<<<<<<<<<<<
  *     cdef int* arr2 = <int*> malloc(arrSize * sizeof(int)) # Array for return values
  *     print("Cython: Received array size " + str(arrSize))
  */
-  __pyx_v_arrSize = atoi(__pyx_v_sizeBuf);
+  __pyx_v_arrSize = atoi(__pyx_v_sizeBuf2);
 
-  /* "comp.pyx":110
+  /* "comp.pyx":114
  *         error("Could not receive on comp.pyx PAIR socket")
- *     cdef int arrSize = atoi(sizeBuf);
+ *     cdef int arrSize = atoi(sizeBuf2);
  *     cdef int* arr2 = <int*> malloc(arrSize * sizeof(int)) # Array for return values             # <<<<<<<<<<<<<<
  *     print("Cython: Received array size " + str(arrSize))
  * 
  */
   __pyx_v_arr2 = ((int *)malloc((__pyx_v_arrSize * (sizeof(int)))));
 
-  /* "comp.pyx":111
- *     cdef int arrSize = atoi(sizeBuf);
+  /* "comp.pyx":115
+ *     cdef int arrSize = atoi(sizeBuf2);
  *     cdef int* arr2 = <int*> malloc(arrSize * sizeof(int)) # Array for return values
  *     print("Cython: Received array size " + str(arrSize))             # <<<<<<<<<<<<<<
  * 
  *     # Receive array back via socket from thread
  */
-  __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_arrSize); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 111, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_arrSize); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 115, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_9);
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_t_9); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 115, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  __pyx_t_8 = PyNumber_Add(__pyx_kp_s_Cython_Received_array_size, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 111, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+  __pyx_t_9 = PyNumber_Add(__pyx_kp_s_Cython_Received_array_size, __pyx_t_1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 115, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (__Pyx_PrintOne(0, __pyx_t_8) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  if (__Pyx_PrintOne(0, __pyx_t_9) < 0) __PYX_ERR(0, 115, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-  /* "comp.pyx":114
+  /* "comp.pyx":118
  * 
  *     # Receive array back via socket from thread
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), arr2, n * sizeof(int), 0) == -1):             # <<<<<<<<<<<<<<
@@ -2678,18 +2790,18 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
   __pyx_t_10 = ((zmq_recvbuf(__pyx_f_4comp_get_sckt(((char const *)"Thread1"), __pyx_v_portDict), __pyx_v_arr2, (__pyx_v_n * (sizeof(int))), 0) == -1L) != 0);
   if (__pyx_t_10) {
 
-    /* "comp.pyx":115
+    /* "comp.pyx":119
  *     # Receive array back via socket from thread
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), arr2, n * sizeof(int), 0) == -1):
  *         error("Could not receive on comp.pyx PAIR socket")             # <<<<<<<<<<<<<<
  * 
  *     # Convert received array to Python tuple
  */
-    __pyx_t_8 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_receive_on_comp_pyx_PA, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 115, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_t_9 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_receive_on_comp_pyx_PA, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 119, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
+    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "comp.pyx":114
+    /* "comp.pyx":118
  * 
  *     # Receive array back via socket from thread
  *     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), arr2, n * sizeof(int), 0) == -1):             # <<<<<<<<<<<<<<
@@ -2698,7 +2810,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
  */
   }
 
-  /* "comp.pyx":118
+  /* "comp.pyx":122
  * 
  *     # Convert received array to Python tuple
  *     for i in range(arrSize):             # <<<<<<<<<<<<<<
@@ -2710,50 +2822,50 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
   for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
     __pyx_v_i = __pyx_t_5;
 
-    /* "comp.pyx":119
+    /* "comp.pyx":123
  *     # Convert received array to Python tuple
  *     for i in range(arrSize):
  *         tup2.append(int(arr2[i]))             # <<<<<<<<<<<<<<
  *     tup2 = tuple(tup2)
  *     print("Cython: Received tuple: " + str(tup2))
  */
-    __pyx_t_8 = __Pyx_PyInt_From_int((__pyx_v_arr2[__pyx_v_i])); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 119, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 119, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyInt_From_int((__pyx_v_arr2[__pyx_v_i])); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 123, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_9); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_t_12 = __Pyx_PyObject_Append(__pyx_v_tup2, __pyx_t_1); if (unlikely(__pyx_t_12 == ((int)-1))) __PYX_ERR(0, 119, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+    __pyx_t_15 = __Pyx_PyObject_Append(__pyx_v_tup2, __pyx_t_1); if (unlikely(__pyx_t_15 == ((int)-1))) __PYX_ERR(0, 123, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "comp.pyx":120
+  /* "comp.pyx":124
  *     for i in range(arrSize):
  *         tup2.append(int(arr2[i]))
  *     tup2 = tuple(tup2)             # <<<<<<<<<<<<<<
  *     print("Cython: Received tuple: " + str(tup2))
  *     free(arr2)
  */
-  __pyx_t_1 = __Pyx_PySequence_Tuple(__pyx_v_tup2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 120, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PySequence_Tuple(__pyx_v_tup2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 124, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF_SET(__pyx_v_tup2, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "comp.pyx":121
+  /* "comp.pyx":125
  *         tup2.append(int(arr2[i]))
  *     tup2 = tuple(tup2)
  *     print("Cython: Received tuple: " + str(tup2))             # <<<<<<<<<<<<<<
  *     free(arr2)
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_v_tup2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 121, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_v_tup2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_8 = PyNumber_Add(__pyx_kp_s_Cython_Received_tuple, __pyx_t_1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 121, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
+  __pyx_t_9 = PyNumber_Add(__pyx_kp_s_Cython_Received_tuple, __pyx_t_1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (__Pyx_PrintOne(0, __pyx_t_8) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  if (__Pyx_PrintOne(0, __pyx_t_9) < 0) __PYX_ERR(0, 125, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-  /* "comp.pyx":122
+  /* "comp.pyx":126
  *     tup2 = tuple(tup2)
  *     print("Cython: Received tuple: " + str(tup2))
  *     free(arr2)             # <<<<<<<<<<<<<<
@@ -2762,7 +2874,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
  */
   free(__pyx_v_arr2);
 
-  /* "comp.pyx":125
+  /* "comp.pyx":129
  * 
  *     # Clean up socket
  *     if (z.zmq_close(get_sckt("Thread1", portDict)) == -1):             # <<<<<<<<<<<<<<
@@ -2772,18 +2884,18 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
   __pyx_t_10 = ((zmq_close(__pyx_f_4comp_get_sckt(((char const *)"Thread1"), __pyx_v_portDict)) == -1L) != 0);
   if (__pyx_t_10) {
 
-    /* "comp.pyx":126
+    /* "comp.pyx":130
  *     # Clean up socket
  *     if (z.zmq_close(get_sckt("Thread1", portDict)) == -1):
  *         error("Could not close comp.pyx PAIR socket")             # <<<<<<<<<<<<<<
  *     if (z.zmq_ctx_destroy(ctx) == -1):
  *         error("Could not destroy comp.pyx ZMQ context")
  */
-    __pyx_t_8 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_close_comp_pyx_PAIR_so, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 126, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_t_9 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_close_comp_pyx_PAIR_so, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 130, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
+    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "comp.pyx":125
+    /* "comp.pyx":129
  * 
  *     # Clean up socket
  *     if (z.zmq_close(get_sckt("Thread1", portDict)) == -1):             # <<<<<<<<<<<<<<
@@ -2792,7 +2904,7 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
  */
   }
 
-  /* "comp.pyx":127
+  /* "comp.pyx":131
  *     if (z.zmq_close(get_sckt("Thread1", portDict)) == -1):
  *         error("Could not close comp.pyx PAIR socket")
  *     if (z.zmq_ctx_destroy(ctx) == -1):             # <<<<<<<<<<<<<<
@@ -2802,18 +2914,18 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
   __pyx_t_10 = ((zmq_ctx_destroy(__pyx_v_ctx) == -1L) != 0);
   if (__pyx_t_10) {
 
-    /* "comp.pyx":128
+    /* "comp.pyx":132
  *         error("Could not close comp.pyx PAIR socket")
  *     if (z.zmq_ctx_destroy(ctx) == -1):
  *         error("Could not destroy comp.pyx ZMQ context")             # <<<<<<<<<<<<<<
  * 
  *     # Join thread
  */
-    __pyx_t_8 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_destroy_comp_pyx_ZMQ_c, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 128, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_t_9 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_destroy_comp_pyx_ZMQ_c, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 132, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
+    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "comp.pyx":127
+    /* "comp.pyx":131
  *     if (z.zmq_close(get_sckt("Thread1", portDict)) == -1):
  *         error("Could not close comp.pyx PAIR socket")
  *     if (z.zmq_ctx_destroy(ctx) == -1):             # <<<<<<<<<<<<<<
@@ -2822,16 +2934,16 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
  */
   }
 
-  /* "comp.pyx":131
+  /* "comp.pyx":135
  * 
  *     # Join thread
  *     print("Cython: Joining thread")             # <<<<<<<<<<<<<<
  *     if (pthread_join(t1, NULL) == -1):
  *         error("Could not join thread1 in comp.pyx")
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Cython_Joining_thread) < 0) __PYX_ERR(0, 131, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Cython_Joining_thread) < 0) __PYX_ERR(0, 135, __pyx_L1_error)
 
-  /* "comp.pyx":132
+  /* "comp.pyx":136
  *     # Join thread
  *     print("Cython: Joining thread")
  *     if (pthread_join(t1, NULL) == -1):             # <<<<<<<<<<<<<<
@@ -2841,18 +2953,18 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
   __pyx_t_10 = ((pthread_join(__pyx_v_t1, NULL) == -1L) != 0);
   if (__pyx_t_10) {
 
-    /* "comp.pyx":133
+    /* "comp.pyx":137
  *     print("Cython: Joining thread")
  *     if (pthread_join(t1, NULL) == -1):
  *         error("Could not join thread1 in comp.pyx")             # <<<<<<<<<<<<<<
  * 
  *     # Clean up PyZMQ
  */
-    __pyx_t_8 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_join_thread1_in_comp_p, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 133, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_t_9 = __pyx_f_4comp_error(__pyx_kp_s_Could_not_join_thread1_in_comp_p, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 137, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
+    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "comp.pyx":132
+    /* "comp.pyx":136
  *     # Join thread
  *     print("Cython: Joining thread")
  *     if (pthread_join(t1, NULL) == -1):             # <<<<<<<<<<<<<<
@@ -2861,73 +2973,73 @@ static PyObject *__pyx_f_4comp_main(PyObject *__pyx_v_tup, PyObject *__pyx_v_tup
  */
   }
 
-  /* "comp.pyx":136
+  /* "comp.pyx":140
  * 
  *     # Clean up PyZMQ
  *     socket.close()             # <<<<<<<<<<<<<<
  *     context.destroy()
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_socket, __pyx_n_s_close); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_socket, __pyx_n_s_close); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_9 = NULL;
+  __pyx_t_8 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
-    __pyx_t_9 = PyMethod_GET_SELF(__pyx_t_1);
-    if (likely(__pyx_t_9)) {
+    __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_1);
+    if (likely(__pyx_t_8)) {
       PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-      __Pyx_INCREF(__pyx_t_9);
+      __Pyx_INCREF(__pyx_t_8);
       __Pyx_INCREF(function);
       __Pyx_DECREF_SET(__pyx_t_1, function);
     }
   }
-  __pyx_t_8 = (__pyx_t_9) ? __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_9) : __Pyx_PyObject_CallNoArg(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
-  if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 136, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
+  __pyx_t_9 = (__pyx_t_8) ? __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_8) : __Pyx_PyObject_CallNoArg(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+  if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-  /* "comp.pyx":137
+  /* "comp.pyx":141
  *     # Clean up PyZMQ
  *     socket.close()
  *     context.destroy()             # <<<<<<<<<<<<<<
  * 
  *     # Return tuple to Python
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_context, __pyx_n_s_destroy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_context, __pyx_n_s_destroy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 141, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_9 = NULL;
+  __pyx_t_8 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
-    __pyx_t_9 = PyMethod_GET_SELF(__pyx_t_1);
-    if (likely(__pyx_t_9)) {
+    __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_1);
+    if (likely(__pyx_t_8)) {
       PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-      __Pyx_INCREF(__pyx_t_9);
+      __Pyx_INCREF(__pyx_t_8);
       __Pyx_INCREF(function);
       __Pyx_DECREF_SET(__pyx_t_1, function);
     }
   }
-  __pyx_t_8 = (__pyx_t_9) ? __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_9) : __Pyx_PyObject_CallNoArg(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
-  if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 137, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
+  __pyx_t_9 = (__pyx_t_8) ? __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_8) : __Pyx_PyObject_CallNoArg(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+  if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 141, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-  /* "comp.pyx":140
+  /* "comp.pyx":144
  * 
  *     # Return tuple to Python
  *     print("Sending C array to Python as tuple")             # <<<<<<<<<<<<<<
  *     return tup2
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_Sending_C_array_to_Python_as_tup) < 0) __PYX_ERR(0, 140, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_Sending_C_array_to_Python_as_tup) < 0) __PYX_ERR(0, 144, __pyx_L1_error)
 
-  /* "comp.pyx":141
+  /* "comp.pyx":145
  *     # Return tuple to Python
  *     print("Sending C array to Python as tuple")
  *     return tup2             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  if (!(likely(PyTuple_CheckExact(__pyx_v_tup2))||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "tuple", Py_TYPE(__pyx_v_tup2)->tp_name), 0))) __PYX_ERR(0, 141, __pyx_L1_error)
+  if (!(likely(PyTuple_CheckExact(__pyx_v_tup2))||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "tuple", Py_TYPE(__pyx_v_tup2)->tp_name), 0))) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_INCREF(__pyx_v_tup2);
   __pyx_r = ((PyObject*)__pyx_v_tup2);
   goto __pyx_L0;
@@ -3194,6 +3306,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_Cython_Sent_array, __pyx_k_Cython_Sent_array, sizeof(__pyx_k_Cython_Sent_array), 0, 0, 1, 0},
   {&__pyx_kp_s_Cython_Sent_array_size, __pyx_k_Cython_Sent_array_size, sizeof(__pyx_k_Cython_Sent_array_size), 0, 0, 1, 0},
   {&__pyx_kp_s_Cython_received, __pyx_k_Cython_received, sizeof(__pyx_k_Cython_received), 0, 0, 1, 0},
+  {&__pyx_kp_s_Error, __pyx_k_Error, sizeof(__pyx_k_Error), 0, 0, 1, 0},
   {&__pyx_n_s_PAIR, __pyx_k_PAIR, sizeof(__pyx_k_PAIR), 0, 0, 1, 1},
   {&__pyx_n_s_Ready, __pyx_k_Ready, sizeof(__pyx_k_Ready), 0, 0, 1, 1},
   {&__pyx_kp_s_Sending_C_array_to_Python_as_tup, __pyx_k_Sending_C_array_to_Python_as_tup, sizeof(__pyx_k_Sending_C_array_to_Python_as_tup), 0, 0, 1, 0},
@@ -4185,6 +4298,136 @@ static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyOb
     Py_DECREF(function);
 done:
     return result;
+}
+
+/* GetTopmostException */
+#if CYTHON_USE_EXC_INFO_STACK
+static _PyErr_StackItem *
+__Pyx_PyErr_GetTopmostException(PyThreadState *tstate)
+{
+    _PyErr_StackItem *exc_info = tstate->exc_info;
+    while ((exc_info->exc_type == NULL || exc_info->exc_type == Py_None) &&
+           exc_info->previous_item != NULL)
+    {
+        exc_info = exc_info->previous_item;
+    }
+    return exc_info;
+}
+#endif
+
+/* SaveResetException */
+#if CYTHON_FAST_THREAD_STATE
+static CYTHON_INLINE void __Pyx__ExceptionSave(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
+    #if CYTHON_USE_EXC_INFO_STACK
+    _PyErr_StackItem *exc_info = __Pyx_PyErr_GetTopmostException(tstate);
+    *type = exc_info->exc_type;
+    *value = exc_info->exc_value;
+    *tb = exc_info->exc_traceback;
+    #else
+    *type = tstate->exc_type;
+    *value = tstate->exc_value;
+    *tb = tstate->exc_traceback;
+    #endif
+    Py_XINCREF(*type);
+    Py_XINCREF(*value);
+    Py_XINCREF(*tb);
+}
+static CYTHON_INLINE void __Pyx__ExceptionReset(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
+    PyObject *tmp_type, *tmp_value, *tmp_tb;
+    #if CYTHON_USE_EXC_INFO_STACK
+    _PyErr_StackItem *exc_info = tstate->exc_info;
+    tmp_type = exc_info->exc_type;
+    tmp_value = exc_info->exc_value;
+    tmp_tb = exc_info->exc_traceback;
+    exc_info->exc_type = type;
+    exc_info->exc_value = value;
+    exc_info->exc_traceback = tb;
+    #else
+    tmp_type = tstate->exc_type;
+    tmp_value = tstate->exc_value;
+    tmp_tb = tstate->exc_traceback;
+    tstate->exc_type = type;
+    tstate->exc_value = value;
+    tstate->exc_traceback = tb;
+    #endif
+    Py_XDECREF(tmp_type);
+    Py_XDECREF(tmp_value);
+    Py_XDECREF(tmp_tb);
+}
+#endif
+
+/* GetException */
+#if CYTHON_FAST_THREAD_STATE
+static int __Pyx__GetException(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb)
+#else
+static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb)
+#endif
+{
+    PyObject *local_type, *local_value, *local_tb;
+#if CYTHON_FAST_THREAD_STATE
+    PyObject *tmp_type, *tmp_value, *tmp_tb;
+    local_type = tstate->curexc_type;
+    local_value = tstate->curexc_value;
+    local_tb = tstate->curexc_traceback;
+    tstate->curexc_type = 0;
+    tstate->curexc_value = 0;
+    tstate->curexc_traceback = 0;
+#else
+    PyErr_Fetch(&local_type, &local_value, &local_tb);
+#endif
+    PyErr_NormalizeException(&local_type, &local_value, &local_tb);
+#if CYTHON_FAST_THREAD_STATE
+    if (unlikely(tstate->curexc_type))
+#else
+    if (unlikely(PyErr_Occurred()))
+#endif
+        goto bad;
+    #if PY_MAJOR_VERSION >= 3
+    if (local_tb) {
+        if (unlikely(PyException_SetTraceback(local_value, local_tb) < 0))
+            goto bad;
+    }
+    #endif
+    Py_XINCREF(local_tb);
+    Py_XINCREF(local_type);
+    Py_XINCREF(local_value);
+    *type = local_type;
+    *value = local_value;
+    *tb = local_tb;
+#if CYTHON_FAST_THREAD_STATE
+    #if CYTHON_USE_EXC_INFO_STACK
+    {
+        _PyErr_StackItem *exc_info = tstate->exc_info;
+        tmp_type = exc_info->exc_type;
+        tmp_value = exc_info->exc_value;
+        tmp_tb = exc_info->exc_traceback;
+        exc_info->exc_type = local_type;
+        exc_info->exc_value = local_value;
+        exc_info->exc_traceback = local_tb;
+    }
+    #else
+    tmp_type = tstate->exc_type;
+    tmp_value = tstate->exc_value;
+    tmp_tb = tstate->exc_traceback;
+    tstate->exc_type = local_type;
+    tstate->exc_value = local_value;
+    tstate->exc_traceback = local_tb;
+    #endif
+    Py_XDECREF(tmp_type);
+    Py_XDECREF(tmp_value);
+    Py_XDECREF(tmp_tb);
+#else
+    PyErr_SetExcInfo(local_type, local_value, local_tb);
+#endif
+    return 0;
+bad:
+    *type = 0;
+    *value = 0;
+    *tb = 0;
+    Py_XDECREF(local_type);
+    Py_XDECREF(local_value);
+    Py_XDECREF(local_tb);
+    return -1;
 }
 
 /* PyObjectGetMethod */
