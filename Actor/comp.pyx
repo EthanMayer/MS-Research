@@ -4,7 +4,7 @@
 #   Fall 2022  
 
 # Import functions from the c standard library
-from libc.stdlib cimport malloc, free
+from libc.stdlib cimport malloc, free, atoi
 from posix.dlfcn cimport dlopen, dlsym, RTLD_LAZY
 from libc.string cimport strerror
 from libc.errno cimport errno
@@ -38,7 +38,6 @@ cdef void* get_sckt(const char* name, portDict):
 # Main Cython function to call C
 cpdef tuple main(tup, tup2):
     print("======== Comp.pyx ========")
-    cdef int* arr2 = <int*> malloc(n * sizeof(int)) # Array for return values
     cdef pthread_t t1    # Thread 1's ID
     portDict = {}   # Dictionary for ports
 
@@ -60,7 +59,7 @@ cpdef tuple main(tup, tup2):
 
     # Wait for function from actor
     func = socket.recv()
-    print("Cython: Received function" + str(func))
+    print("Cython: Received function " + str(func))
 
     # Create main thread pair socket and bind to IP
     cdef void* ctx = z.zmq_ctx_new()
@@ -96,20 +95,27 @@ cpdef tuple main(tup, tup2):
     sprintf(sizeBuf, "%d", n)
     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), sizeBuf, sizeof(sizeBuf), 0) != sizeof(sizeBuf)):
         error("Comp.pyx PAIR send message buffer length incorrect")
-    print("Cython: Sent array size")
+    print("Cython: Sent array size " + str(n))
 
     # Send array via socket to thread
     if (z.zmq_sendbuf(get_sckt("Thread1", portDict), arr, n * sizeof(int), 0) != n * sizeof(int)):
         error("Comp.pyx PAIR send message buffer length incorrect\n")
     print("Cython: Sent array")
 
+    # Receive array size via socket from thread
+    cdef char sizeBuf2[256]
+    if (z.zmq_recvbuf(get_sckt("Thread1", portDict), sizeBuf2, sizeof(sizeBuf2), 0) == -1):
+        error("Could not receive on comp.pyx PAIR socket")
+    cdef int arrSize = atoi(sizeBuf);
+    cdef int* arr2 = <int*> malloc(arrSize * sizeof(int)) # Array for return values
+    print("Cython: Received array size " + str(arrSize))
+
     # Receive array back via socket from thread
     if (z.zmq_recvbuf(get_sckt("Thread1", portDict), arr2, n * sizeof(int), 0) == -1):
         error("Could not receive on comp.pyx PAIR socket")
     
     # Convert received array to Python tuple
-    # tup2 = []
-    for i in range(n):
+    for i in range(arrSize):
         tup2.append(int(arr2[i]))
     tup2 = tuple(tup2)
     print("Cython: Received tuple: " + str(tup2))
