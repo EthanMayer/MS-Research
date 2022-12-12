@@ -22,7 +22,7 @@ void error(char* msg) {
 // Function to be run on a thread to send back data
 void* send_back() {
     // Debug identify self
-    long thread = pthread_self();
+    long thread = pthread_self()->__sig;
     printf("Thread %ld: Started send_back function\n", thread);
     fflush(stdout);
 
@@ -92,7 +92,7 @@ void* send_back() {
 // Function to be run on a thread to add data
 void* add() {
     // Debug identify self
-    long thread = pthread_self();
+    long thread = pthread_self()->__sig;
     printf("Thread %ld: Started add function\n", thread);
     fflush(stdout);
 
