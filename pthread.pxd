@@ -1,8 +1,10 @@
 #   pthreads.pxd
 #   
-#   Cython definition file for pthread.h
 #   Author - Ethan Mayer
 #   Fall 2022
+#
+#   This is the Cython definition/header file for pthread.h.
+#   This allows Cython to call functions defined here for pthreads. Some functions included here are for future-proofing purposes and are not currently used.
 
 from posix.signal cimport sigset_t
 

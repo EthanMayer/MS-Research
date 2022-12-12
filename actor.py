@@ -2,12 +2,16 @@
 #    
 #   Author - Ethan Mayer
 #   Fall 2022  
+#
+#   This the top-level file of the project, somewhat emulating actor.py in RIAPS. 
+#   This file takes in user input and interfaces with the cython comp.pyx file via zmq PAIR sockets.
 
+# Includes
 import sys
-# Import everything from my cython module comp
-from comp import *
 import zmq
 import threading
+# Import everything from the project's built cython module comp
+from comp import *
 
 print("======== Actor.py ========")
 

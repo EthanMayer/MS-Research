@@ -2,6 +2,9 @@
 //    
 //  Author - Ethan Mayer
 //  Fall 2022
+//
+//  This is the low-level file for the project, somewhat emulating the dynamically loaded functions that comp.py offloads to threads in RIAPS.
+//  This file contains c functions to be called and spawned in POSIX threads by comp.pyx. They receive information to operate on and return to comp.pyx via ZMQ PAIR sockets.
 
 #include <stdlib.h>
 #include <errno.h>
@@ -90,7 +93,7 @@ void* send_back() {
 void* add() {
     // Debug identify self
     long thread = pthread_self();
-    printf("Thread %ld: Started send_back function\n", thread);
+    printf("Thread %ld: Started add function\n", thread);
     fflush(stdout);
 
     // Create thread1 receiver pair socket and connect to main's sender pair

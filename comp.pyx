@@ -2,6 +2,9 @@
 #    
 #   Author - Ethan Mayer
 #   Fall 2022  
+#
+#   This is the mid-level file of the project, somewhat emulating comp.pyx in RIAPS.
+#   This file interfaces with actor.py via ZMQ PAIR sockets to receive user information and instructions. It then offloads the specified workload to POSIX threads, which it communicates with via ZMQ PAIR sockets.
 
 # Import c libraries
 from libc.stdlib cimport malloc, free, atoi
@@ -10,8 +13,9 @@ from libc.string cimport strerror
 from libc.errno cimport errno
 from libc.stdio cimport sprintf
 from cpython.pycapsule cimport PyCapsule_New, PyCapsule_IsValid, PyCapsule_GetPointer, PyCapsule_GetName
-from pthread cimport pthread_create, pthread_join, pthread_t
 from zmq.backend.cython cimport libzmq as z
+# Import project's pthread .pxd header file
+from pthread cimport pthread_create, pthread_join, pthread_t
 
 # Import python libraries
 import zmq
