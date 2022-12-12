@@ -1,0 +1,29 @@
+#   .gitignore
+#
+#   Author: Ethan Mayer
+#   Fall 2022
+
+# Byte-compiled pycache files
+__pycache__/
+
+# VSCode IDE files
+.vscode/
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+Actor/build/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Cython debug symbols
+cython_debug/
