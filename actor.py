@@ -36,10 +36,10 @@ comp.start()
 
 # Wait for ready from Cython
 msg = socket.recv()
-print("Python: received " + str(msg))
+print("Python: Received " + str(msg))
 
 # Send function to be loaded
-func = input("Enter function to be loaded: ")
+func = input("Python: Enter function to be loaded: ")
 socket.send_string(func)
 
 # Wait for Cython to finish for result
