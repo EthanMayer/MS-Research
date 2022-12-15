@@ -3,7 +3,7 @@
 #   Author - Ethan Mayer
 #   Fall 2022  
 #
-#   This is the mid-level file of the project, somewhat emulating comp.pyx in RIAPS.
+#   This is the mid-level file of the project, somewhat emulating comp.py in RIAPS.
 #   This file interfaces with actor.py via ZMQ PAIR sockets to receive user information and instructions. It then offloads the specified workload to POSIX threads, which it communicates with via ZMQ PAIR sockets.
 
 # Import c libraries

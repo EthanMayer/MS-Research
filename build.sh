@@ -1,16 +1,17 @@
-#   setup.sh
+#   build.sh
 #   
 #   Author: Ethan Mayer
 #   Fall 2022
 #
 #   This is the script used to build the Cython component of the project, compile the C code, and bundle the compiled C code into a shared library.
 
-# Make build folder
+# Make and clean build folder
 mkdir build
+rm -rf ~/build/*
 
 # Build Cython
 echo "====Building Cython files...===="
-python3 setup.py build_ext --inplace
+python3 setup.py build_ext -b . -t ./build
 
 # Compile C code
 echo "====Compiling C code...===="

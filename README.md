@@ -36,19 +36,19 @@ In order to install ZMQ using Homebrew, run:
 
 `brew install zeromq`
 
-The included `setup.sh` Bash script is used to automate the building and compiling necessary to run the project. To use it, run:
+The included `build.sh` Bash script is used to automate the building and compiling necessary to run the project. To use it, run:
 
-`bash setup.sh`
+`bash build.sh`
 
 If this completes successfully, the project is ready to be run (see [Usage](#usage)). If there are errors, see below.
 
 **Additional Information**
 
-Cython must be built before it can be used. The `setup.py` Python file is used to compile the Cython files, but requires some changes depending on the environment. Its usage can be found in the `setup.sh` script.
+Cython must be built before it can be used. The `setup.py` Python file is used to compile the Cython files, but may require some changes depending on the build environment. Its usage can be found in the `build.sh` script.
 
 The `include_dirs`, `library_dirs`, and `libraries` arguments are using the default location for Homebrew's installation of Python 3.9 and ZMQ. Change these if you wish to use a different installation or are not using MacOS.
 
-This project uses shared library files (.so) generated from C code to load and use functions from. The compile and bundle commands can be found in the `setup.sh` script.
+This project uses shared library files (.so) generated from C code to load and use functions from. The compile and bundle commands can be found in the `build.sh` script.
 
 To compile, these .c files use the default location of the MacOS11.sdk. and link the default location for Homebrew's installation of ZMQ. Change these if you wish to use a different installation or are not using MacOS.
 ## Usage
